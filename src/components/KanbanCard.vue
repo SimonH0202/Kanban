@@ -47,7 +47,6 @@ const cardEditorStore = useCardEditorStore()
 }
 
 .kanban-card__title {
-  margin: 0 0 0.5rem;
   font-size: 1rem;
   font-weight: 700;
   color: var(--color-text);

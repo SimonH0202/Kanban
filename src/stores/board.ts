@@ -7,34 +7,7 @@ export const useBoardStore = defineStore('board', () => {
   const board = reactive<Board>({
     id: 'board-1',
     title: 'My Board',
-    columns: [
-      {
-        id: 'todo',
-        title: 'To Do',
-        boardId: 'board-1',
-        cards: [
-          {
-            id: 'card-1',
-            columnId: 'todo',
-            title: 'Sample Card',
-            description: 'This is a sample card description.',
-
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          },
-          {
-            id: 'card-2',
-            columnId: 'todo',
-            title: 'Another Card',
-            description: 'This is another card description.',
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          },
-        ],
-      },
-      { id: 'in-progress', title: 'In Progress', boardId: 'board-1', cards: [] },
-      { id: 'done', title: 'Done', boardId: 'board-1', cards: [] },
-    ],
+    columns: [],
   })
 
   function addCard(columnId: string, card: { title: string; description?: string }) {

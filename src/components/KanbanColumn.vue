@@ -44,9 +44,9 @@ function addCard() {
 
 <template>
   <div class="kanban-column">
-    <h2 v-if="!isInputActive" @click="activateInput" class="kanban-column__title">
+    <div v-if="!isInputActive" @click="activateInput" class="kanban-column__title">
       {{ data.title }}
-    </h2>
+    </div>
     <input
       v-else
       ref="inputRef"
@@ -98,28 +98,32 @@ function addCard() {
   border-radius: 24px;
   overflow: hidden;
 }
-.kanban-column__title {
-  font-size: 1.2rem;
-  font-weight: bold;
-  padding: 1rem;
-  border-bottom: 1px solid var(--color-border);
-}
-.kanban-column__title:hover {
-  background-color: var(--color-background-soft);
-  cursor: pointer;
-}
+.kanban-column__title,
 .kanban-column__input {
   font-size: 1.2rem;
   font-weight: bold;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   padding: 1rem;
   border: none;
-  border-bottom: 1px solid var(--color-border);
+  box-sizing: border-box;
+  line-height: 1.5;
+  width: 100%;
+}
+
+.kanban-column__title {
+  cursor: pointer;
+}
+
+.kanban-column__input {
   outline: none;
-  background-color: var(--color-background-soft);
+  background-color: var(--color-border);
   color: var(--color-text);
+  appearance: none;
+  -webkit-appearance: none;
+  border-radius: 0;
 }
 .kanban-column__input:focus {
-  background-color: var(--color-background);
+  background-color: var(--color-border);
 }
 .kanban-column__add-card-button {
   width: 100%;
