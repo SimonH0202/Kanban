@@ -7,11 +7,15 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Get all boards
+
 app.get("/", async (req, res) => {
   const boards = await prisma.board.findMany();
 
   res.json(boards);
 });
+
+// Create a new board
 
 app.post("/boards", async (req, res) => {
   const board = await prisma.board.create({
@@ -22,6 +26,8 @@ app.post("/boards", async (req, res) => {
 
   res.status(201).json(board);
 });
+
+// Get board by id
 
 app.get("/boards/:id", async (req, res) => {
   const board = await prisma.board.findUnique({
@@ -52,6 +58,8 @@ app.get("/boards/:id", async (req, res) => {
   res.json(board);
 });
 
+// Create a new column
+
 app.post("/boards/:boardId/columns", async (req, res) => {
   const columnCount = await prisma.column.count({
     where: {
@@ -73,6 +81,27 @@ app.post("/boards/:boardId/columns", async (req, res) => {
   res.status(201).json(column);
 });
 
+// Update column
+
+app.patch("/columns/:columnId", async (req, res) => {
+  try {
+    const column = await prisma.column.update({
+      where: {
+        id: req.params.columnId,
+      },
+      data: {
+        title: req.body.title,
+      },
+    });
+
+    res.json(column);
+  } catch (error) {
+    res.status(404).json({ message: "Column not found" });
+  }
+});
+
+// Create a new card
+
 app.post("/columns/:columnId/cards", async (req, res) => {
   const cardCount = await prisma.card.count({
     where: {
@@ -91,6 +120,29 @@ app.post("/columns/:columnId/cards", async (req, res) => {
 
   res.status(201).json(card);
 });
+
+// Update card
+
+app.patch("/cards/:cardId", async (req, res) => {
+  try {
+    const card = await prisma.card.update({
+      where: {
+        id: req.params.cardId,
+      },
+      data: {
+        title: req.body.title,
+        description: req.body.description,
+        dueDate: req.body.dueDate ? new Date(req.body.dueDate) : null,
+      },
+    });
+
+    res.json(card);
+  } catch (error) {
+    res.status(404).json({ message: "Card not found" });
+  }
+});
+
+// Log server running
 
 app.listen(3000, () => {
   console.log("Server running on http://localhost:3000");

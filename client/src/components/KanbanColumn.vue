@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import type { Column } from '@/types/Column'
-import { nextTick, ref, inject } from 'vue'
+import { nextTick, ref } from 'vue'
 import { VueDraggableNext } from 'vue-draggable-next'
 import KanbanCard from './KanbanCard.vue'
-import { generateUniqueId } from '@/util/util.ts'
+import { useBoardStore } from '@/stores/board.ts'
 
 const draggable = VueDraggableNext
 
@@ -14,11 +14,11 @@ const props = defineProps<{
 const inputRef = ref<HTMLInputElement | null>(null)
 const isInputActive = ref(false)
 
-const board = inject<any>('board', null)
+const boardStore = useBoardStore()
 
 function updateTitle(event: FocusEvent) {
   const target = event.target as HTMLInputElement
-  props.data.title = target.value
+  boardStore.updateColumn(props.data.id, { title: target.value })
   isInputActive.value = false
 }
 
@@ -30,15 +30,10 @@ function activateInput() {
 }
 
 function addCard() {
-  const newCard = {
-    id: `card-${generateUniqueId()}`,
-    columnId: props.data.id,
-    title: `New Card ${props.data.cards.length + 1}`,
+  boardStore.addCard(props.data.id, {
+    title: 'New Card',
     description: '',
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  }
-  props.data.cards.push(newCard)
+  })
 }
 </script>
 

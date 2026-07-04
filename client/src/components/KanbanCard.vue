@@ -30,9 +30,9 @@ defineProps<{
   columnId: string
   title: string
   description?: string
-  createdAt?: Date
-  updatedAt?: Date
-  dueDate?: Date
+  createdAt?: Date | string | null
+  updatedAt?: Date | string | null
+  dueDate?: Date | string | null
 }>()
 
 const cardEditorStore = useCardEditorStore()
