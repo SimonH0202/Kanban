@@ -123,10 +123,9 @@ function deleteColumn() {
   min-height: 0;
   margin-right: 1rem;
   background-color: var(--color-background);
-  border-radius: var(--border-radius);
+  border-radius: var(--border-radius-inner);
   box-shadow: var(--box-shadow);
   border: 1px solid var(--color-border);
-  border-radius: 24px;
   overflow: hidden;
 }
 .kanban-column__title,

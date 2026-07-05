@@ -72,14 +72,17 @@ const isActive = ref(false)
 }
 .context-menu__button {
   border: none;
-  background-color: var(--color-background);
+  border-radius: var(--border-radius-button);
+  background-color: rgba(0, 0, 0, 0);
   font-size: 1.2rem;
   font-weight: bold;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   color: var(--color-text);
-  padding: 1rem;
+  padding: 0.5rem;
+  margin: 0.5rem;
 }
 .context-menu__button:hover {
-  background-color: var(--color-background-soft);
+  background-color: var(--vt-c-divider-dark-2);
+  cursor: pointer;
 }
 </style>

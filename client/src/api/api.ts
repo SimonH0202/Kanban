@@ -26,6 +26,20 @@ export function getBoard(boardId: string): Promise<Board> {
   return request<Board>(`/boards/${boardId}`)
 }
 
+export function updateBoard(boardId: string, board: { title?: string }): Promise<Board> {
+  return request<Board>(`/columns/${boardId}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(board),
+  })
+}
+
+export function deleteBoard(boardId: string): Promise<void> {
+  return request<void>(`/boards/${boardId}`, {
+    method: 'DELETE',
+  })
+}
+
 export function createBoard(title: string): Promise<Board> {
   return request<Board>('/boards', {
     method: 'POST',

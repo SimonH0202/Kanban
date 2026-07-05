@@ -58,6 +58,55 @@ app.get("/boards/:id", async (req, res) => {
   res.json(board);
 });
 
+// Update board
+
+app.patch("/boards/:id", async (req, res) => {
+  try {
+    const board = await prisma.column.update({
+      where: {
+        id: req.params.id,
+      },
+      data: {
+        title: req.body.title,
+      },
+    });
+
+    res.json(board);
+  } catch (error) {
+    res.status(404).json({ message: "Board not found" });
+  }
+});
+
+// Delete board
+
+app.delete("/boards/:id", async (req, res) => {
+  try {
+    await prisma.card.deleteMany({
+      where: {
+        column: {
+          boardId: req.params.id,
+        },
+      },
+    });
+
+    await prisma.column.deleteMany({
+      where: {
+        boardId: req.params.id,
+      },
+    });
+
+    await prisma.board.delete({
+      where: {
+        id: req.params.id,
+      },
+    });
+
+    res.status(204).send();
+  } catch {
+    res.status(404).json({ message: "Board not found" });
+  }
+});
+
 // Create a new column
 
 app.post("/boards/:boardId/columns", async (req, res) => {
@@ -99,6 +148,8 @@ app.patch("/columns/:columnId", async (req, res) => {
     res.status(404).json({ message: "Column not found" });
   }
 });
+
+// Delete column
 
 app.delete("/columns/:columnId", async (req, res) => {
   await prisma.card.deleteMany({

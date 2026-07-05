@@ -36,6 +36,10 @@ async function addBoard() {
   })
 }
 
+function removeBoard(boardId: string) {
+  boards.value = boards.value.filter((board) => board.id !== boardId)
+}
+
 onMounted(() => {
   loadBoards()
 })
@@ -49,7 +53,11 @@ onMounted(() => {
     <p v-else-if="error">{{ error }}</p>
 
     <div v-else class="board-list">
-      <KanbanBoardCard v-for="board in boards" :board="board"></KanbanBoardCard>
+      <KanbanBoardCard
+        v-for="board in boards"
+        :board="board"
+        @delete="removeBoard"
+      ></KanbanBoardCard>
       <div class="board-card-new" @click="addBoard">New Board +</div>
     </div>
   </main>

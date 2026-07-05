@@ -1,27 +1,38 @@
 <script setup lang="ts">
 import type { BoardListItem, ContextMenuItem } from '@/types/Items'
 import ContextMenu from './ContextMenu.vue'
+import { deleteBoard, updateBoard } from '@/api/api.ts'
 
 const props = defineProps<{
   board: BoardListItem
 }>()
 
+const emit = defineEmits<{
+  (e: 'delete', boardId: string): void
+  (e: 'rename', boardId: string): void
+}>()
+
 const menuItems: ContextMenuItem[] = [
   {
     label: 'Rename Board',
-    action: renameBoard,
+    action: renameB,
     danger: false,
   },
   {
     label: 'Delete Board',
-    action: deleteBoard,
+    action: deleteB,
     danger: true,
   },
 ]
 
-function deleteBoard() {}
+async function deleteB() {
+  await deleteBoard(props.board.id)
+  emit('delete', props.board.id)
+}
 
-function renameBoard() {}
+async function renameB() {
+  await updateBoard(props.board.id, { title: '' })
+}
 </script>
 
 <template>
