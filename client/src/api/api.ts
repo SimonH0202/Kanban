@@ -50,6 +50,12 @@ export function updateColumn(columnId: string, column: { title?: string }): Prom
   })
 }
 
+export function deleteColumn(columnId: string): Promise<void> {
+  return request<void>(`/columns/${columnId}`, {
+    method: 'DELETE',
+  })
+}
+
 export function createCard(
   columnId: string,
   card: { title: string; description?: string },

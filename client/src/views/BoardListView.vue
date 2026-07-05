@@ -1,12 +1,9 @@
 <script setup lang="ts">
 import { getBoards, createBoard } from '@/api/api'
+import KanbanBoardCard from '@/components/KanbanBoardCard.vue'
+import type { BoardListItem } from '@/types/Items'
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-
-type BoardListItem = {
-  id: string
-  title: string
-}
 
 const router = useRouter()
 
@@ -52,15 +49,8 @@ onMounted(() => {
     <p v-else-if="error">{{ error }}</p>
 
     <div v-else class="board-list">
-      <RouterLink
-        v-for="board in boards"
-        :key="board.id"
-        :to="`/boards/${board.id}`"
-        class="board-card"
-      >
-        {{ board.title }}
-      </RouterLink>
-      <div class="board-card" @click="addBoard">New Board +</div>
+      <KanbanBoardCard v-for="board in boards" :board="board"></KanbanBoardCard>
+      <div class="board-card-new" @click="addBoard">New Board +</div>
     </div>
   </main>
 </template>
@@ -80,24 +70,26 @@ onMounted(() => {
   flex-wrap: wrap;
   gap: 1rem;
 }
-
-.board-card {
+.board-card-new {
+  display: flex;
+  flex-direction: column;
   width: 240px;
-  min-height: 120px;
-  padding: 1rem;
+  min-height: 140px;
   background-color: var(--color-background);
   border: 1px solid var(--color-border);
   border-radius: 16px;
   box-shadow: var(--box-shadow);
+  overflow: hidden;
+  transition: 0.2s ease;
+  padding: 1rem;
   color: var(--color-text);
   text-decoration: none;
   font-size: 1.1rem;
   font-weight: bold;
-  transition: 0.2s ease;
+  text-align: end end;
+  justify-content: end;
 }
-
-.board-card:hover {
-  background-color: var(--color-background-soft);
+.board-card-new:hover {
   transform: translateY(-2px);
 }
 </style>

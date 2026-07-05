@@ -5,6 +5,7 @@
       cardEditorStore.startEditing({
         id,
         columnId,
+        position,
         title,
         description,
         createdAt,
@@ -28,6 +29,7 @@ import { formatDate } from '@/util/util'
 defineProps<{
   id: string
   columnId: string
+  position: number
   title: string
   description?: string
   createdAt?: Date | string | null

@@ -4,12 +4,27 @@ import { nextTick, ref } from 'vue'
 import { VueDraggableNext } from 'vue-draggable-next'
 import KanbanCard from './KanbanCard.vue'
 import { useBoardStore } from '@/stores/board.ts'
+import ContextMenu from './ContextMenu.vue'
+import type { ContextMenuItem } from '@/types/Items.ts'
 
 const draggable = VueDraggableNext
 
 const props = defineProps<{
   data: Column
 }>()
+
+const menuItems: ContextMenuItem[] = [
+  {
+    label: 'Add Card',
+    action: addCard,
+    danger: false,
+  },
+  {
+    label: 'Delete Column',
+    action: deleteColumn,
+    danger: true,
+  },
+]
 
 const inputRef = ref<HTMLInputElement | null>(null)
 const isInputActive = ref(false)
@@ -22,12 +37,10 @@ function updateTitle(event: FocusEvent) {
   isInputActive.value = false
 }
 
-function updateColumn() {
-  props.data.cards.forEach((card, index) => {
-    if (card.columnId !== props.data.id) {
-      boardStore.moveCard(card.id, props.data.id, index)
-    }
-  })
+async function updateColumn() {
+  await Promise.all(
+    props.data.cards.map((card, index) => boardStore.moveCard(card.id, props.data.id, index)),
+  )
 }
 
 function activateInput() {
@@ -43,22 +56,29 @@ function addCard() {
     description: '',
   })
 }
+
+function deleteColumn() {
+  boardStore.deleteColumn(props.data.id)
+}
 </script>
 
 <template>
   <div class="kanban-column">
-    <div v-if="!isInputActive" @click="activateInput" class="kanban-column__title">
-      {{ data.title }}
+    <div class="kanban-column__header">
+      <div v-if="!isInputActive" @click="activateInput" class="kanban-column__title">
+        {{ data.title }}
+      </div>
+      <input
+        v-else
+        ref="inputRef"
+        @focusout="updateTitle"
+        type="text"
+        :placeholder="data.title"
+        :value="data.title"
+        class="kanban-column__input"
+      />
+      <ContextMenu :items="menuItems"></ContextMenu>
     </div>
-    <input
-      v-else
-      ref="inputRef"
-      @focusout="updateTitle"
-      type="text"
-      :placeholder="data.title"
-      :value="data.title"
-      class="kanban-column__input"
-    />
     <draggable
       v-model="data.cards"
       class="kanban-column__content"
@@ -76,6 +96,7 @@ function addCard() {
         :key="card.id"
         :id="card.id"
         :columnId="card.columnId"
+        :position="data.cards.indexOf(card)"
         :title="card.title"
         :description="card.description"
         :dueDate="card.dueDate"
@@ -88,6 +109,11 @@ function addCard() {
 </template>
 
 <style scoped>
+.kanban-column__header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
 .kanban-column {
   display: flex;
   flex-direction: column;
@@ -114,11 +140,12 @@ function addCard() {
   line-height: 1.5;
   width: 100%;
 }
-
 .kanban-column__title {
   cursor: pointer;
 }
-
+.kanban-column__title:hover {
+  background-color: var(--color-background-soft);
+}
 .kanban-column__input {
   outline: none;
   background-color: var(--color-border);

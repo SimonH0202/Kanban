@@ -100,6 +100,22 @@ app.patch("/columns/:columnId", async (req, res) => {
   }
 });
 
+app.delete("/columns/:columnId", async (req, res) => {
+  await prisma.card.deleteMany({
+    where: {
+      columnId: req.params.columnId,
+    },
+  });
+
+  await prisma.column.delete({
+    where: {
+      id: req.params.columnId,
+    },
+  });
+
+  res.status(204).send();
+});
+
 // Create a new card
 
 app.post("/columns/:columnId/cards", async (req, res) => {

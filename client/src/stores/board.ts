@@ -18,6 +18,10 @@ export const useBoardStore = defineStore('board', () => {
     board.id = data.id
     board.title = data.title
     board.columns = data.columns
+
+    board.columns.forEach((column) => {
+      column.cards.sort((a, b) => a.position - b.position)
+    })
   }
 
   async function addCard(columnId: string, card: { title: string; description?: string }) {
@@ -26,6 +30,7 @@ export const useBoardStore = defineStore('board', () => {
     const column = board.columns.find((col) => col.id === columnId)
     if (column) {
       column.cards.push(createdCard)
+      column.cards.sort((a, b) => a.position - b.position)
     }
   }
 
@@ -93,5 +98,21 @@ export const useBoardStore = defineStore('board', () => {
     Object.assign(column, savedColumn)
   }
 
-  return { board, loadBoard, addCard, updateCard, moveCard, deleteCard, addColumn, updateColumn }
+  async function deleteColumn(columnId: string) {
+    await api.deleteColumn(columnId)
+
+    board.columns = board.columns.filter((column) => column.id !== columnId)
+  }
+
+  return {
+    board,
+    loadBoard,
+    addCard,
+    updateCard,
+    moveCard,
+    deleteCard,
+    addColumn,
+    updateColumn,
+    deleteColumn,
+  }
 })
