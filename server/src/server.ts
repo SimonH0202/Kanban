@@ -142,6 +142,38 @@ app.patch("/cards/:cardId", async (req, res) => {
   }
 });
 
+// Update card position
+
+app.patch("/cards/:cardId/move", async (req, res) => {
+  const card = await prisma.card.update({
+    where: {
+      id: req.params.cardId,
+    },
+    data: {
+      columnId: req.body.columnId,
+      position: req.body.position,
+    },
+  });
+
+  res.json(card);
+});
+
+// Delete card
+
+app.delete("/cards/:cardId", async (req, res) => {
+  try {
+    await prisma.card.delete({
+      where: {
+        id: req.params.cardId,
+      },
+    });
+
+    res.status(204).send();
+  } catch {
+    res.status(404).json({ message: "Card not found" });
+  }
+});
+
 // Log server running
 
 app.listen(3000, () => {

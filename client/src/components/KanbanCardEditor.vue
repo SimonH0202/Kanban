@@ -1,3 +1,34 @@
+<script setup lang="ts">
+import { useBoardStore } from '@/stores/board'
+import { useCardEditorStore } from '@/stores/cardEditor'
+import { formatDateToInputValueString } from '@/util/util'
+
+const cardEditorStore = useCardEditorStore()
+const boardStore = useBoardStore()
+
+function closeEditor() {
+  cardEditorStore.stopEditing()
+}
+
+function saveCard() {
+  if (cardEditorStore.currentCard) {
+    boardStore.updateCard(cardEditorStore.currentCard.columnId, cardEditorStore.currentCard.id, {
+      title: cardEditorStore.currentCard.title,
+      description: cardEditorStore.currentCard.description,
+      dueDate: cardEditorStore.currentCard.dueDate,
+    })
+  }
+  closeEditor()
+}
+
+function deleteCard() {
+  if (cardEditorStore.currentCard) {
+    boardStore.deleteCard(cardEditorStore.currentCard.columnId, cardEditorStore.currentCard.id)
+  }
+  closeEditor()
+}
+</script>
+
 <template>
   <div class="card-editor-overlay">
     <div class="card-editor-backdrop"></div>
@@ -24,7 +55,7 @@
         <label for="card-description" class="card-editor__label">Description</label>
         <textarea
           id="card-description"
-          class="card-editor__input"
+          class="card-editor__input card-editor__input__textarea"
           :value="cardEditorStore.currentCard?.description"
           @input="
             (e) => {
@@ -39,11 +70,7 @@
           id="card-due-date"
           type="date"
           class="card-editor__input"
-          :value="
-            cardEditorStore.currentCard?.dueDate instanceof Date
-              ? cardEditorStore.currentCard.dueDate.toISOString().split('T')[0]
-              : ''
-          "
+          :value="formatDateToInputValueString(cardEditorStore.currentCard?.dueDate)"
           @input="
             (e) => {
               if (cardEditorStore.currentCard) {
@@ -56,6 +83,11 @@
         />
       </div>
       <div class="card-editor-footer">
+        <div class="card-editor-button--deletecontainer">
+          <button class="card-editor-button card-editor-button--delete" @click="deleteCard">
+            Delete
+          </button>
+        </div>
         <button class="card-editor-button card-editor-button--cancel" @click="closeEditor">
           Cancel
         </button>
@@ -64,29 +96,6 @@
     </div>
   </div>
 </template>
-
-<script setup lang="ts">
-import { useBoardStore } from '@/stores/board'
-import { useCardEditorStore } from '@/stores/cardEditor'
-
-const cardEditorStore = useCardEditorStore()
-const boardStore = useBoardStore()
-
-function closeEditor() {
-  cardEditorStore.stopEditing()
-}
-
-function saveCard() {
-  if (cardEditorStore.currentCard) {
-    boardStore.updateCard(cardEditorStore.currentCard.columnId, cardEditorStore.currentCard.id, {
-      title: cardEditorStore.currentCard.title,
-      description: cardEditorStore.currentCard.description,
-      dueDate: cardEditorStore.currentCard.dueDate,
-    })
-  }
-  closeEditor()
-}
-</script>
 
 <style scoped>
 .card-editor-overlay {
@@ -113,17 +122,26 @@ function saveCard() {
   font-size: 1rem;
   font-weight: bold;
   color: var(--color-text);
+  margin-bottom: 0.5rem;
 }
 .card-editor__input {
   font-size: 1rem;
-  font-weight: bold;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   width: 100%;
+  height: 2rem;
+  padding: 0.5rem;
   margin-bottom: 1rem;
   border: none;
+  border-radius: var(--border-radius-button);
   border-bottom: 1px solid var(--color-border);
   outline: none;
   background-color: var(--color-background-soft);
   color: var(--color-text);
+}
+.card-editor__input__textarea {
+  max-width: 100%;
+  min-width: 100%;
+  height: 10rem;
 }
 .card-editor__input:focus {
   background-color: var(--color-background);
@@ -163,11 +181,10 @@ function saveCard() {
   font-size: 1.5rem;
   color: var(--color-text-secondary);
   cursor: pointer;
-  padding: 0.5rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 6px;
+  border-radius: var(--border-radius-button);
   transition: all 0.2s ease;
 }
 .card-editor-close:hover {
@@ -223,12 +240,24 @@ function saveCard() {
 }
 .card-editor-button--save {
   background-color: #34d399;
-  color: white;
+  color: var(--vt-c-white);
 }
 .card-editor-button--save:hover {
   background-color: #10b981;
 }
+.card-editor-button--delete {
+  background-color: rgb(230, 11, 11);
+  color: var(--vt-c-white);
+  border: 1px solid var(--color-border);
+}
+.card-editor-button--delete:hover {
+  background-color: rgb(248, 66, 66);
+}
 .card-editor-button--save:active {
   transform: scale(0.98);
+}
+
+.card-editor-button--deletecontainer {
+  flex: auto;
 }
 </style>

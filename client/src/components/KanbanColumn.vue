@@ -22,6 +22,14 @@ function updateTitle(event: FocusEvent) {
   isInputActive.value = false
 }
 
+function updateColumn() {
+  props.data.cards.forEach((card, index) => {
+    if (card.columnId !== props.data.id) {
+      boardStore.moveCard(card.id, props.data.id, index)
+    }
+  })
+}
+
 function activateInput() {
   isInputActive.value = true
   nextTick(() => {
@@ -56,6 +64,7 @@ function addCard() {
       class="kanban-column__content"
       item-key="id"
       group="cards"
+      @change="updateColumn"
       :options="{
         ghostClass: 'kanban-card--ghost',
         dragClass: 'kanban-card--drag',

@@ -1,5 +1,4 @@
 import type { Board } from '@/types/Board'
-import { generateUniqueId } from '@/util/util'
 import { defineStore } from 'pinia'
 import { reactive } from 'vue'
 
@@ -81,6 +80,48 @@ export const useBoardStore = defineStore('board', () => {
     Object.assign(card, savedCard)
   }
 
+  async function moveCard(cardId: string, columnId: string, position: number) {
+    const response = await fetch(`${API_URL}/cards/${cardId}/move`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        columnId,
+        position,
+      }),
+    })
+
+    if (!response.ok) {
+      throw new Error('Failed to move card')
+    }
+
+    const updatedCard = await response.json()
+
+    const column = board.columns.find((col) => col.id === columnId)
+    const card = column?.cards.find((c) => c.id === cardId)
+
+    if (card) {
+      Object.assign(card, updatedCard)
+    }
+  }
+
+  async function deleteCard(columnId: string, cardId: string) {
+    const response = await fetch(`${API_URL}/cards/${cardId}`, {
+      method: 'DELETE',
+    })
+
+    if (!response.ok) {
+      throw new Error('Failed to delete card')
+    }
+
+    const column = board.columns.find((col) => col.id === columnId)
+
+    if (!column) return
+
+    column.cards = column.cards.filter((card) => card.id !== cardId)
+  }
+
   async function addColumn(column: { title: string }) {
     const response = await fetch(`${API_URL}/boards/${board.id}/columns`, {
       method: 'POST',
@@ -126,5 +167,5 @@ export const useBoardStore = defineStore('board', () => {
     Object.assign(column, savedColumn)
   }
 
-  return { board, loadBoard, addCard, updateCard, addColumn, updateColumn }
+  return { board, loadBoard, addCard, updateCard, moveCard, deleteCard, addColumn, updateColumn }
 })
