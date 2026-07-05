@@ -1,11 +1,14 @@
 <script setup lang="ts">
 import { getBoards, createBoard } from '@/api/api'
 import { onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
 
 type BoardListItem = {
   id: string
   title: string
 }
+
+const router = useRouter()
 
 const boards = ref<BoardListItem[]>([])
 const isLoading = ref(false)
@@ -26,9 +29,14 @@ async function loadBoards() {
 }
 
 async function addBoard() {
-  await createBoard('New Board')
+  const board = await createBoard('New Board')
 
-  await loadBoards()
+  router.push({
+    name: 'board',
+    params: {
+      boardId: board.id,
+    },
+  })
 }
 
 onMounted(() => {
