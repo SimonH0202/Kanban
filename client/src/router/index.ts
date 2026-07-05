@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import BoardView from '../views/BoardView.vue'
+import BoardListView from '../views/BoardListView.vue'
+import BoardView from '@/views/BoardView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -7,6 +8,11 @@ const router = createRouter({
     {
       path: '/',
       name: 'home',
+      component: BoardListView,
+    },
+    {
+      path: '/boards/:boardId',
+      name: 'board',
       component: BoardView,
     },
   ],

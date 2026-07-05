@@ -92,7 +92,8 @@ function addCard() {
   display: flex;
   flex-direction: column;
   width: 300px;
-  height: 100%;
+  height: fit-content;
+  max-height: 100%;
   min-height: 0;
   margin-right: 1rem;
   background-color: var(--color-background);
