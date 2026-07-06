@@ -2,6 +2,7 @@
 import { useBoardStore } from '@/stores/board.ts'
 import KanbanColumn from './KanbanColumn.vue'
 import { provide } from 'vue'
+import HomeButton from './HomeButton.vue'
 
 const boardStore = useBoardStore()
 
@@ -16,6 +17,7 @@ function addColumn() {
 <template>
   <div class="kanban-board__container">
     <div class="kanban-board__header">
+      <HomeButton></HomeButton>
       <h1>{{ boardStore.board.title }}</h1>
       <button @click="addColumn" class="kanban-board__add-column">Add Column</button>
     </div>

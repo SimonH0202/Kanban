@@ -47,6 +47,10 @@ const cardEditorStore = useCardEditorStore()
   border-radius: 12px;
   padding: 1rem;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  cursor: pointer;
+}
+.kanban-card:hover {
+  background-color: var(--color-background);
 }
 
 .kanban-card__title {

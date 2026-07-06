@@ -62,7 +62,7 @@ app.get("/boards/:id", async (req, res) => {
 
 app.patch("/boards/:id", async (req, res) => {
   try {
-    const board = await prisma.column.update({
+    const board = await prisma.board.update({
       where: {
         id: req.params.id,
       },

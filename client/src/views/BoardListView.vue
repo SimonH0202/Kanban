@@ -1,11 +1,15 @@
 <script setup lang="ts">
 import { getBoards, createBoard } from '@/api/api'
 import KanbanBoardCard from '@/components/KanbanBoardCard.vue'
+import KanbanBoardEditor from '@/components/KanbanBoardEditor.vue'
+import { useBoardEditorStore } from '@/stores/boardEditor'
 import type { BoardListItem } from '@/types/Items'
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
+
+const boardEditorStore = useBoardEditorStore()
 
 const boards = ref<BoardListItem[]>([])
 const isLoading = ref(false)
@@ -60,6 +64,7 @@ onMounted(() => {
       ></KanbanBoardCard>
       <div class="board-card-new" @click="addBoard">New Board +</div>
     </div>
+    <KanbanBoardEditor v-if="boardEditorStore.isEditing"></KanbanBoardEditor>
   </main>
 </template>
 
@@ -88,16 +93,15 @@ onMounted(() => {
   border-radius: 16px;
   box-shadow: var(--box-shadow);
   overflow: hidden;
-  transition: 0.2s ease;
   padding: 1rem;
   color: var(--color-text);
   text-decoration: none;
   font-size: 1.1rem;
   font-weight: bold;
-  text-align: end end;
-  justify-content: end;
+
+  cursor: pointer;
 }
 .board-card-new:hover {
-  transform: translateY(-2px);
+  background-color: var(--color-background-soft);
 }
 </style>

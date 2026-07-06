@@ -27,7 +27,7 @@ export function getBoard(boardId: string): Promise<Board> {
 }
 
 export function updateBoard(boardId: string, board: { title?: string }): Promise<Board> {
-  return request<Board>(`/columns/${boardId}`, {
+  return request<Board>(`/boards/${boardId}`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(board),

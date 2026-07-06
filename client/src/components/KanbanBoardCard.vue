@@ -2,6 +2,9 @@
 import type { BoardListItem, ContextMenuItem } from '@/types/Items'
 import ContextMenu from './ContextMenu.vue'
 import { deleteBoard, updateBoard } from '@/api/api.ts'
+import { useBoardEditorStore } from '@/stores/boardEditor.ts'
+
+const boardEditorStore = useBoardEditorStore()
 
 const props = defineProps<{
   board: BoardListItem
@@ -30,8 +33,8 @@ async function deleteB() {
   emit('delete', props.board.id)
 }
 
-async function renameB() {
-  await updateBoard(props.board.id, { title: '' })
+function renameB() {
+  boardEditorStore.startEditing(props.board)
 }
 </script>
 
@@ -65,13 +68,13 @@ async function renameB() {
 }
 
 .board-card__header {
-  display: flex;
-  justify-content: flex-end;
-  flex-shrink: 0;
+  position: absolute;
+  align-self: end;
   border-radius: var(--border-radius-inner);
 }
 
 .board-card__body {
+  flex: 1;
   padding: 1rem;
   color: var(--color-text);
   text-decoration: none;

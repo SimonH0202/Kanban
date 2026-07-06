@@ -20,7 +20,12 @@ const isActive = ref(false)
         :key="item.label"
         class="context-menu__item"
         :class="{ 'context-menu__item--danger': item.danger }"
-        @click="item.action"
+        @click="
+          () => {
+            item.action()
+            isActive = !isActive
+          }
+        "
       >
         {{ item.label }}
       </button>
