@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import type { BoardListItem, ContextMenuItem } from '@/types/Items'
 import ContextMenu from './ContextMenu.vue'
-import { deleteBoard, updateBoard } from '@/api/api.ts'
+import { deleteBoard } from '@/api/api.ts'
 import { useBoardEditorStore } from '@/stores/boardEditor.ts'
+import dotsIconBlack from '@/assets/icons/dots.png'
 
 const boardEditorStore = useBoardEditorStore()
 
@@ -39,52 +40,12 @@ function renameB() {
 </script>
 
 <template>
-  <div class="board-card">
-    <div class="board-card__header">
-      <ContextMenu :items="menuItems" />
-    </div>
-    <RouterLink class="board-card__body" :to="`/boards/${board.id}`">
+  <div
+    class="h-8 w-64 bg-white rounded-sm shadow-md flex flex-row justify-between items-center hover:scale-105 hover:cursor-pointer"
+  >
+    <RouterLink class="p-4 h-8 w-full flex items-center" :to="`/boards/${board.id}`">
       {{ board.title }}
     </RouterLink>
+    <ContextMenu :items="menuItems" :image-src="dotsIconBlack" />
   </div>
 </template>
-
-<style scoped>
-.board-card {
-  display: flex;
-  flex-direction: column;
-  width: 240px;
-  min-height: 140px;
-  background-color: var(--color-background);
-  border: 1px solid var(--color-border);
-  border-radius: var(--border-radius-inner);
-  box-shadow: var(--box-shadow);
-  overflow: hidden;
-  justify-content: space-between;
-}
-
-.board-card:hover {
-  background-color: var(--color-background-soft);
-}
-
-.board-card__header {
-  position: absolute;
-  align-self: end;
-  border-radius: var(--border-radius-inner);
-}
-
-.board-card__body {
-  flex: 1;
-  padding: 1rem;
-  color: var(--color-text);
-  text-decoration: none;
-  font-size: 1.1rem;
-  font-weight: bold;
-  text-align: end end;
-  overflow: visible;
-}
-
-.board-card__body:hover {
-  background-color: var(--color-background-soft);
-}
-</style>

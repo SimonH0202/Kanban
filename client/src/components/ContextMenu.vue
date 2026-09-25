@@ -1,93 +1,76 @@
 <script setup lang="ts">
 import type { ContextMenuItem } from '@/types/Items'
-import { ref } from 'vue'
+import { nextTick, ref } from 'vue'
+import dotsIcon from '@/assets/icons/dots.png'
 
-const props = defineProps<{
+defineProps<{
   items: ContextMenuItem[]
+  imageSrc?: string
 }>()
 
 const isActive = ref(false)
+const buttonRef = ref<HTMLButtonElement | null>(null)
+
+const menuX = ref(0)
+const menuY = ref(0)
+
+async function openMenu() {
+  isActive.value = true
+
+  await nextTick()
+
+  const rect = buttonRef.value?.getBoundingClientRect()
+
+  if (!rect) return
+
+  menuX.value = rect.right
+  menuY.value = rect.bottom + 8
+}
+
+function closeMenu() {
+  isActive.value = false
+}
+
+function selectItem(item: ContextMenuItem) {
+  item.action()
+  closeMenu()
+}
 </script>
 
 <template>
-  <div v-if="isActive" class="context-menu__backdrop" @click="() => (isActive = !isActive)"></div>
-  <div class="context-menu-wrapper">
-    <button @click="isActive = !isActive" class="context-menu__button">...</button>
+  <!-- Stays inside the Kanban column -->
+  <button ref="buttonRef" class="h-4 w-4 hover:scale-110 hover:cursor-pointer" @click="openMenu">
+    <img :src="imageSrc || dotsIcon" alt="Context Menu" />
+  </button>
 
-    <div v-if="isActive" class="context-menu">
+  <!-- Gets moved to <body> -->
+  <Teleport to="body">
+    <div
+      v-if="isActive"
+      class="fixed inset-0 z-90 bg-black/5 backdrop-blur-sm"
+      @click="closeMenu"
+    />
+
+    <div
+      v-if="isActive"
+      class="fixed z-100 w-48 rounded-sm bg-white shadow-lg"
+      :style="{
+        left: `${menuX}px`,
+        top: `${menuY}px`,
+        transform: 'translateX(-100%)',
+      }"
+    >
       <button
         v-for="item in items"
         :key="item.label"
-        class="context-menu__item"
-        :class="{ 'context-menu__item--danger': item.danger }"
-        @click="
-          () => {
-            item.action()
-            isActive = !isActive
-          }
-        "
+        class="w-full p-2 text-left text-gray-900 hover:bg-gray-100 rounded-sm"
+        :class="{
+          'text-red-500 hover:bg-red-100 rounded-sm': item.danger,
+        }"
+        @click="selectItem(item)"
       >
         {{ item.label }}
       </button>
     </div>
-  </div>
+  </Teleport>
 </template>
-
-<style scoped>
-.context-menu {
-  position: fixed;
-  display: flex;
-  flex-direction: column;
-  background: var(--color-background);
-  border: none;
-  border-radius: var(--border-radius-inner);
-  z-index: 999;
-  outline: none;
-  box-shadow:
-    0 1px 3px rgba(0, 0, 0, 0.12),
-    0 1px 2px rgba(0, 0, 0, 0.24);
-  cursor: pointer;
-  min-width: 12rem;
-}
-.context-menu__item {
-  border-radius: var(--border-radius-inner);
-  background-color: var(--color-background);
-  padding: 0.5rem 0.75rem;
-  border: none;
-  color: var(--color-text);
-  text-align: left;
-  cursor: pointer;
-}
-.context-menu__item:hover {
-  background-color: var(--color-background-soft);
-}
-.context-menu__item--danger {
-  color: #ef4444;
-}
-.context-menu__backdrop {
-  z-index: 100;
-  position: fixed;
-  inset: 0;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.1);
-  cursor: pointer;
-}
-.context-menu__button {
-  border: none;
-  border-radius: var(--border-radius-button);
-  background-color: rgba(0, 0, 0, 0);
-  font-size: 1.2rem;
-  font-weight: bold;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  color: var(--color-text);
-  padding: 0.5rem;
-  margin: 0.5rem;
-}
-.context-menu__button:hover {
-  background-color: var(--vt-c-divider-dark-2);
-  cursor: pointer;
-}
-</style>

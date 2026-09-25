@@ -31,7 +31,7 @@ const isInputActive = ref(false)
 
 const boardStore = useBoardStore()
 
-function updateTitle(event: FocusEvent) {
+function updateTitle(event: Event) {
   const target = event.target as HTMLInputElement
   boardStore.updateColumn(props.data.id, { title: target.value })
   isInputActive.value = false
@@ -63,31 +63,33 @@ function deleteColumn() {
 </script>
 
 <template>
-  <div class="kanban-column">
-    <div class="kanban-column__header">
-      <div v-if="!isInputActive" @click="activateInput" class="kanban-column__title">
+  <div class="w-80 h-fit flex flex-col bg-white/10 backdrop-blur-lg rounded-sm shadow-lg">
+    <div class="bg-transparent flex flex-row justify-between items-center p-4">
+      <button
+        v-if="!isInputActive"
+        class="flex items-center font-bold bg-blue-500 text-white rounded-full py-1 px-3 hover:scale-105 hover:cursor-pointer"
+        @click="activateInput"
+      >
         {{ data.title }}
-      </div>
+      </button>
       <input
         v-else
         ref="inputRef"
-        @focusout="updateTitle"
+        class="font-bold bg-blue-500 text-white rounded-sm py-1 px-3 outline-none"
         type="text"
-        :placeholder="data.title"
         :value="data.title"
-        class="kanban-column__input"
+        @blur="updateTitle"
+        @keyup.enter="updateTitle"
       />
       <ContextMenu :items="menuItems"></ContextMenu>
     </div>
     <draggable
       v-model="data.cards"
-      class="kanban-column__content"
+      class="p-4 flex flex-col gap-2 overflow-y-auto"
       item-key="id"
       group="cards"
       @change="updateColumn"
       :options="{
-        ghostClass: 'kanban-card--ghost',
-        dragClass: 'kanban-card--drag',
         animation: 200,
       }"
     >
@@ -104,109 +106,8 @@ function deleteColumn() {
         :updatedAt="card.updatedAt"
       />
     </draggable>
-    <button @click="addCard" class="kanban-column__add-card-button">Add Card</button>
+    <button @click="addCard" class="text-white hover:scale-105 hover:cursor-pointer p-2">
+      + Add Card
+    </button>
   </div>
 </template>
-
-<style scoped>
-.kanban-column__header {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-}
-.kanban-column {
-  display: flex;
-  flex-direction: column;
-  width: 300px;
-  height: fit-content;
-  max-height: 100%;
-  min-height: 0;
-  margin-right: 1rem;
-  background-color: var(--color-background);
-  border-radius: var(--border-radius-inner);
-  box-shadow: var(--box-shadow);
-  border: 1px solid var(--color-border);
-  overflow: hidden;
-}
-.kanban-column__title,
-.kanban-column__input {
-  font-size: 1.2rem;
-  font-weight: bold;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  padding: 1rem;
-  border: none;
-  box-sizing: border-box;
-  line-height: 1.5;
-  width: 100%;
-}
-.kanban-column__title {
-  cursor: pointer;
-}
-.kanban-column__title:hover {
-  background-color: var(--color-background-soft);
-}
-.kanban-column__input {
-  outline: none;
-  background-color: var(--color-border);
-  color: var(--color-text);
-  appearance: none;
-  -webkit-appearance: none;
-  border-radius: 0;
-}
-.kanban-column__input:focus {
-  background-color: var(--color-border);
-}
-.kanban-column__add-card-button {
-  width: 100%;
-  padding: 1rem;
-  background-color: var(--color-background);
-  color: var(--text-on-primary);
-  border: none;
-  border-top: 1px solid var(--color-border);
-  outline: none;
-  border-radius: var(--border-radius);
-  cursor: pointer;
-}
-.kanban-column__add-card-button:hover {
-  background-color: var(--color-background-soft);
-}
-.kanban-column__content {
-  flex: 1;
-  min-height: 0;
-  padding: 1rem;
-  gap: 1rem;
-  display: flex;
-  flex-direction: column;
-  overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: var(--color-border) var(--color-background);
-  transition: background-color 0.2s ease;
-}
-
-.kanban-column__content::-webkit-scrollbar {
-  width: 8px;
-}
-
-.kanban-column__content::-webkit-scrollbar-track {
-  background: var(--color-background);
-}
-
-.kanban-column__content::-webkit-scrollbar-thumb {
-  background: var(--color-border);
-  border-radius: 4px;
-}
-
-.kanban-column__content::-webkit-scrollbar-thumb:hover {
-  background: var(--color-text-secondary);
-}
-
-.kanban-card--ghost {
-  opacity: 0.5;
-  background-color: var(--color-background-soft);
-  transition: all 0.2s ease;
-}
-
-.kanban-card--drag {
-  opacity: 0;
-}
-</style>

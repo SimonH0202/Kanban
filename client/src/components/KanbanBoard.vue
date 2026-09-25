@@ -15,55 +15,35 @@ function addColumn() {
 </script>
 
 <template>
-  <div class="kanban-board__container">
-    <div class="kanban-board__header">
-      <HomeButton></HomeButton>
+  <div
+    class="bg-linear-to-r from-green-500 to-indigo-500 h-screen w-full flex flex-col overflow-hidden"
+  >
+    <!-- Header -->
+    <div
+      class="shrink-0 flex items-center justify-between px-4 py-2 bg-white text-gray-900 text-xl font-bold shadow-md"
+    >
       <h1>{{ boardStore.board.title }}</h1>
-      <button @click="addColumn" class="kanban-board__add-column">Add Column</button>
     </div>
-    <div class="kanban-board">
-      <KanbanColumn v-for="column in boardStore.board.columns" :key="column.id" :data="column" />
+
+    <!-- Scrollable board -->
+    <div class="flex-1 min-h-0 overflow-x-auto overflow-y-hidden">
+      <div class="flex items-start gap-4 p-2 w-max min-w-full">
+        <KanbanColumn
+          v-for="column in boardStore.board.columns"
+          :key="column.id"
+          :data="column"
+          class="shrink-0"
+        />
+
+        <!-- Add column -->
+        <div
+          class="w-80 shrink-0 h-fit flex flex-col bg-white/10 backdrop-blur-lg rounded-sm shadow-lg overflow-hidden p-2"
+        >
+          <button @click="addColumn" class="w-full text-white hover:scale-105 hover:cursor-pointer">
+            + Add Column
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </template>
-
-<style scoped>
-.kanban-board {
-  display: flex;
-  flex-direction: row;
-  gap: 1rem;
-  padding: 1rem;
-  flex: 1;
-  overflow-x: auto;
-  overflow-y: hidden;
-}
-.kanban-board__header {
-  padding: 1rem 2rem;
-  background-color: var(--color-background-soft);
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  flex-shrink: 0;
-}
-.kanban-board__add-column {
-  padding: 0.5rem 1rem;
-  background-color: var(--color-background);
-  color: var(--text-on-primary);
-  border: none;
-  border-radius: var(--border-radius-button);
-  cursor: pointer;
-}
-.kanban-board__add-column:hover {
-  background-color: var(--color-background-hover);
-}
-.kanban-board__container {
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  border-radius: var(--border-radius-outer);
-  background-color: var(--vt-c-indigo);
-}
-</style>

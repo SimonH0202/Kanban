@@ -1,6 +1,6 @@
 <template>
   <article
-    class="kanban-card"
+    class="bg-white rounded-sm p-4 text-gray-900 flex flex-col gap-2 shadow-md cursor-pointer hover:scale-105 hover:shadow-lg transition-transform duration-200"
     @click="
       cardEditorStore.startEditing({
         id,
@@ -14,11 +14,9 @@
       })
     "
   >
-    <h3 class="kanban-card__title">{{ title }}</h3>
-    <p v-if="description" class="kanban-card__description">{{ description }}</p>
-    <div class="kanban-card__meta">
-      <span v-if="dueDate" class="kanban-card__due-date">{{ formatDate(dueDate) }}</span>
-    </div>
+    <h3 class="font-bold text-sm text-gray-500">{{ title }}</h3>
+    <p v-if="description" class="text-md text-gray-900">{{ description }}</p>
+    <p v-if="dueDate" class="text-red-500 text-sm text-right">{{ formatDate(dueDate) }}</p>
   </article>
 </template>
 
@@ -39,44 +37,3 @@ defineProps<{
 
 const cardEditorStore = useCardEditorStore()
 </script>
-
-<style scoped>
-.kanban-card {
-  background: var(--color-background-soft);
-  border: 1px solid var(--color-border);
-  border-radius: 12px;
-  padding: 1rem;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
-  cursor: pointer;
-}
-.kanban-card:hover {
-  background-color: var(--color-background);
-}
-
-.kanban-card__title {
-  font-size: 1rem;
-  font-weight: 700;
-  color: var(--color-text);
-}
-
-.kanban-card__description {
-  margin: 0 0 0.75rem;
-  color: var(--color-text-secondary);
-  line-height: 1.5;
-}
-
-.kanban-card__meta {
-  display: flex;
-  gap: 0.75rem;
-  flex-wrap: wrap;
-  font-size: 0.875rem;
-  color: var(--color-text-tertiary);
-}
-
-.kanban-card__assignee,
-.kanban-card__due-date {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-}
-</style>
