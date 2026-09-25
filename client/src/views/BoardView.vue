@@ -26,6 +26,6 @@ watch(
   <div class="flex flex-row">
     <KanbanBoardList />
     <KanbanBoard :data="boardData.board" />
+    <KanbanCardEditor v-if="cardEditorStore.isEditing" />
   </div>
-  <KanbanCardEditor v-if="cardEditorStore.isEditing" />
 </template>
