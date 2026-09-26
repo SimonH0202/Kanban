@@ -2,8 +2,10 @@
 import { ref } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import router from '@/router'
+import { useRoute } from 'vue-router'
 
 const authStore = useAuthStore()
+const route = useRoute()
 
 const email = ref('')
 const password = ref('')
@@ -29,7 +31,9 @@ async function submit() {
 </script>
 
 <template>
-  <main class="flex min-h-screen items-center justify-center bg-gray-100">
+  <main
+    class="flex min-h-screen items-center justify-center bg-linear-to-r from-green-500 to-indigo-500"
+  >
     <form
       class="flex w-full max-w-sm flex-col gap-4 rounded-lg bg-white p-8 shadow-md"
       @submit.prevent="submit"
@@ -62,6 +66,10 @@ async function submit() {
           class="rounded-sm border border-gray-300 p-2 outline-blue-500"
         />
       </div>
+
+      <p v-if="route.query.registered === '1'" class="text-sm text-green-600">
+        Account created successfully! Please log in.
+      </p>
 
       <p v-if="error" class="text-sm text-red-600">
         {{ error }}

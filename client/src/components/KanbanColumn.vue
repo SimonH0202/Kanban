@@ -6,8 +6,11 @@ import KanbanCard from './KanbanCard.vue'
 import { useBoardStore } from '@/stores/board.ts'
 import ContextMenu from './ContextMenu.vue'
 import type { ContextMenuItem } from '@/types/Items.ts'
+import { useConfirmationStore } from '@/stores/confirmation.ts'
 
 const draggable = VueDraggableNext
+
+const confirmationStore = useConfirmationStore()
 
 const props = defineProps<{
   data: Column
@@ -21,7 +24,12 @@ const menuItems: ContextMenuItem[] = [
   },
   {
     label: 'Delete Column',
-    action: deleteColumn,
+    action: confirmationStore.requestConfirmation.bind(
+      confirmationStore,
+      'Do you really want to delete this column?',
+      deleteColumn,
+      () => {},
+    ),
     danger: true,
   },
 ]

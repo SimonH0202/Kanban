@@ -85,7 +85,7 @@ onMounted(() => {
       ></KanbanBoardCard>
     </div>
     <div
-      class="h-8 w-full bg-white rounded-sm shadow-md flex flex-col justify-center gap-2 p-4 hover:scale-101 hover:cursor-pointer"
+      class="h-8 w-full bg-white rounded-sm shadow-md flex flex-col justify-center gap-2 p-4 hover:bg-gray-200 hover:cursor-pointer"
       @click="addBoard"
     >
       + Add Board

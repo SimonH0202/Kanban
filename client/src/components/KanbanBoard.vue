@@ -15,6 +15,7 @@ function addColumn() {
 
 <template>
   <div
+    v-if="boardStore.board"
     class="bg-linear-to-r from-green-500 to-indigo-500 h-screen w-full flex flex-col overflow-hidden"
   >
     <!-- Header -->

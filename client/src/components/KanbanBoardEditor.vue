@@ -1,10 +1,11 @@
 ```vue
 <script setup lang="ts">
 import { useBoardEditorStore } from '@/stores/boardEditor'
+import { useBoardStore } from '@/stores/board'
 import { ref } from 'vue'
-import * as api from '@/api/api'
 
 const boardEditorStore = useBoardEditorStore()
+const boardStore = useBoardStore()
 
 const newTitle = ref(boardEditorStore.currentBoard?.title || '')
 
@@ -15,9 +16,7 @@ function closeEditor() {
 async function saveBoard() {
   if (!boardEditorStore.currentBoard) return
 
-  await api.updateBoard(boardEditorStore.currentBoard.id, {
-    title: newTitle.value,
-  })
+  await boardStore.updateBoard(newTitle.value)
 
   boardEditorStore.currentBoard.title = newTitle.value
 
@@ -37,9 +36,7 @@ async function saveBoard() {
     <!-- Editor -->
     <div class="z-50 w-200 rounded-sm bg-white shadow-lg">
       <!-- Header -->
-      <div class="flex items-center justify-between border-b border-gray-300 p-4 text-gray-900">
-        <h2 class="text-lg font-bold">Edit Board</h2>
-
+      <div class="flex items-center justify-end border-b border-gray-300 p-4 text-gray-900">
         <button class="text-lg font-bold hover:scale-105 hover:cursor-pointer" @click="closeEditor">
           ✕
         </button>
@@ -47,8 +44,6 @@ async function saveBoard() {
 
       <!-- Content -->
       <div class="flex flex-col gap-4 p-8 text-gray-900">
-        <label for="board-title" class="text-md font-medium text-gray-800"> Title </label>
-
         <input
           id="board-title"
           v-model="newTitle"

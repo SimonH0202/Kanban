@@ -3,9 +3,11 @@ import type { BoardListItem, ContextMenuItem } from '@/types/Items'
 import ContextMenu from './ContextMenu.vue'
 import { deleteBoard } from '@/api/api.ts'
 import { useBoardEditorStore } from '@/stores/boardEditor.ts'
-import dotsIconBlack from '@/assets/icons/dots.png'
+import { useConfirmationStore } from '@/stores/confirmation.ts'
+import dotsIconBlack from '@/assets/icons/dots-black.png'
 
 const boardEditorStore = useBoardEditorStore()
+const confirmationStore = useConfirmationStore()
 
 const props = defineProps<{
   board: BoardListItem
@@ -24,7 +26,12 @@ const menuItems: ContextMenuItem[] = [
   },
   {
     label: 'Delete Board',
-    action: deleteB,
+    action: confirmationStore.requestConfirmation.bind(
+      confirmationStore,
+      'Do you really want to delete this board?',
+      deleteB,
+      () => {},
+    ),
     danger: true,
   },
 ]
@@ -41,7 +48,7 @@ function renameB() {
 
 <template>
   <div
-    class="h-8 w-full bg-white rounded-sm shadow-md flex flex-row justify-between items-center hover:scale-101 hover:cursor-pointer"
+    class="h-8 w-full bg-white rounded-sm shadow-md flex flex-row justify-between items-center hover:bg-gray-200 hover:cursor-pointer pr-2"
   >
     <RouterLink class="p-4 h-8 w-full flex items-center" :to="`/boards/${board.id}`">
       {{ board.title }}

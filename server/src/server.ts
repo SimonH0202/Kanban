@@ -187,8 +187,15 @@ app.get<{ id: string }>("/boards/:id", requireAuth, async (req, res) => {
       },
       include: {
         columns: {
+          orderBy: {
+            position: "asc",
+          },
           include: {
-            cards: true,
+            cards: {
+              orderBy: {
+                position: "asc",
+              },
+            },
           },
         },
       },
@@ -448,18 +455,23 @@ app.post<{ columnId: string }>(
         return;
       }
 
-      const cardCount = await prisma.card.count({
+      const lastCard = await prisma.card.findFirst({
         where: {
           columnId: column.id,
         },
+        orderBy: {
+          position: "desc",
+        },
       });
+
+      const position = lastCard ? lastCard.position + 1 : 0;
 
       const card = await prisma.card.create({
         data: {
           title: req.body.title,
           description: req.body.description ?? "",
           columnId: column.id,
-          position: cardCount,
+          position: position,
         },
       });
 
@@ -498,6 +510,30 @@ app.patch<{ cardId: string }>(
         return;
       }
 
+      const { dueDate } = req.body;
+
+      let parsedDueDate: Date | null | undefined;
+
+      if (dueDate === null) {
+        parsedDueDate = null;
+      } else if (dueDate !== undefined) {
+        if (typeof dueDate !== "string") {
+          res.status(400).json({
+            message: "Invalid due date format",
+          });
+          return;
+        }
+
+        parsedDueDate = new Date(dueDate);
+
+        if (Number.isNaN(parsedDueDate.getTime())) {
+          res.status(400).json({
+            message: "Invalid due date format",
+          });
+          return;
+        }
+      }
+
       const card = await prisma.card.update({
         where: {
           id: existingCard.id,
@@ -505,7 +541,7 @@ app.patch<{ cardId: string }>(
         data: {
           title: req.body.title,
           description: req.body.description,
-          dueDate: req.body.dueDate ? new Date(req.body.dueDate) : null,
+          ...(parsedDueDate !== undefined ? { dueDate: parsedDueDate } : {}),
         },
       });
 
@@ -527,6 +563,25 @@ app.patch<{ cardId: string }>(
   async (req, res) => {
     try {
       const { columnId, position } = req.body;
+
+      if (typeof columnId !== "string" || columnId.trim() === "") {
+        res.status(400).json({
+          message: "A destination column ID is required",
+        });
+        return;
+      }
+
+      if (
+        !Number.isInteger(position) ||
+        position < 0 ||
+        position > 2147483647
+      ) {
+        res.status(400).json({
+          message:
+            "Position must be a non-negative integer within the range of a 32-bit signed integer",
+        });
+        return;
+      }
 
       // Check ownership of the card
       const existingCard = await prisma.card.findFirst({

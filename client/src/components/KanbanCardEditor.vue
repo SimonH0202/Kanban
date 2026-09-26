@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { useBoardStore } from '@/stores/board'
 import { useCardEditorStore } from '@/stores/cardEditor'
+import { useConfirmationStore } from '@/stores/confirmation'
 import { formatDateToInputValueString } from '@/util/util'
-import { nextTick, ref } from 'vue'
+import { ref } from 'vue'
 import trashIcon from '@/assets/icons/trash.png'
 
 const cardEditorStore = useCardEditorStore()
+const confirmationStore = useConfirmationStore()
 const boardStore = useBoardStore()
 
 const newTitle = ref(cardEditorStore.currentCard?.title || '')
@@ -25,10 +27,19 @@ function saveCard() {
 }
 
 function deleteCard() {
-  if (cardEditorStore.currentCard) {
-    boardStore.deleteCard(cardEditorStore.currentCard.columnId, cardEditorStore.currentCard.id)
-  }
-  closeEditor()
+  const card = cardEditorStore.currentCard
+  if (!card) return
+
+  const { columnId, id } = card
+
+  confirmationStore.requestConfirmation(
+    'Do you really want to delete this card?',
+    async () => {
+      await boardStore.deleteCard(columnId, id)
+      closeEditor()
+    },
+    () => {},
+  )
 }
 </script>
 
@@ -53,6 +64,7 @@ function deleteCard() {
           class="w-full rounded-sm border border-gray-200 bg-white p-2 text-left text-gray-900 outline-blue-500"
           type="text"
           @keyup.enter="saveCard"
+          @blur="saveCard"
         />
         <input
           id="card-due-date"
@@ -64,7 +76,7 @@ function deleteCard() {
               if (cardEditorStore.currentCard) {
                 cardEditorStore.currentCard.dueDate = (e.target as HTMLInputElement).value
                   ? new Date((e.target as HTMLInputElement).value)
-                  : undefined
+                  : null
               }
             }
           "

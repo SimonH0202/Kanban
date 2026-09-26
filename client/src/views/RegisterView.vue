@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { register } from '@/api/api'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 
 const email = ref('')
 const password = ref('')
@@ -22,6 +25,10 @@ async function submit() {
   try {
     const user = await register(email.value, password.value)
 
+    await router.push({
+      name: 'login',
+      query: { registered: '1' },
+    })
     console.log('Registered User:', user)
   } catch (err: any) {
     error.value = err.message || 'An error occurred during registration'
@@ -32,7 +39,9 @@ async function submit() {
 </script>
 
 <template>
-  <main class="flex min-h-screen items-center justify-center bg-gray-100">
+  <main
+    class="flex min-h-screen items-center justify-center bg-linear-to-r from-green-500 to-indigo-500"
+  >
     <form
       class="flex w-full max-w-sm flex-col gap-4 rounded-lg bg-white p-8 shadow-md"
       @submit.prevent="submit"

@@ -3,6 +3,10 @@ import type { User } from '@/types/User'
 import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 
+import { useBoardStore } from '@/stores/board'
+import { useCardEditorStore } from '@/stores/cardEditor'
+import { useBoardEditorStore } from '@/stores/boardEditor'
+
 export const useAuthStore = defineStore('auth', () => {
   const user = ref<User | null>(null)
   const isLoading = ref(false)
@@ -17,6 +21,9 @@ export const useAuthStore = defineStore('auth', () => {
   async function logout() {
     await api.logout()
     user.value = null
+    useBoardStore().resetBoard()
+    useCardEditorStore().stopEditing()
+    useBoardEditorStore().stopEditing()
   }
 
   async function checkAuth() {

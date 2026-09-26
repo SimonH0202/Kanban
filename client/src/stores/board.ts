@@ -24,6 +24,11 @@ export const useBoardStore = defineStore('board', () => {
     })
   }
 
+  async function updateBoard(newTitle: string) {
+    const updatedBoard = await api.updateBoard(board.id, { title: newTitle })
+    board.title = updatedBoard.title
+  }
+
   async function addCard(columnId: string, card: { title: string; description?: string }) {
     const createdCard = await api.createCard(columnId, card)
 
@@ -104,9 +109,16 @@ export const useBoardStore = defineStore('board', () => {
     board.columns = board.columns.filter((column) => column.id !== columnId)
   }
 
+  function resetBoard() {
+    board.id = ''
+    board.title = ''
+    board.columns = []
+  }
+
   return {
     board,
     loadBoard,
+    updateBoard,
     addCard,
     updateCard,
     moveCard,
@@ -114,5 +126,6 @@ export const useBoardStore = defineStore('board', () => {
     addColumn,
     updateColumn,
     deleteColumn,
+    resetBoard,
   }
 })
