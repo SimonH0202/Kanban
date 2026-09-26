@@ -41,7 +41,7 @@ function renameB() {
 
 <template>
   <div
-    class="h-8 w-64 bg-white rounded-sm shadow-md flex flex-row justify-between items-center hover:scale-105 hover:cursor-pointer"
+    class="h-8 w-full bg-white rounded-sm shadow-md flex flex-row justify-between items-center hover:scale-101 hover:cursor-pointer"
   >
     <RouterLink class="p-4 h-8 w-full flex items-center" :to="`/boards/${board.id}`">
       {{ board.title }}

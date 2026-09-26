@@ -2,7 +2,6 @@
 import { useBoardStore } from '@/stores/board.ts'
 import KanbanColumn from './KanbanColumn.vue'
 import { provide } from 'vue'
-import HomeButton from './HomeButton.vue'
 
 const boardStore = useBoardStore()
 
@@ -20,7 +19,7 @@ function addColumn() {
   >
     <!-- Header -->
     <div
-      class="shrink-0 flex items-center justify-between px-4 py-2 bg-white text-gray-900 text-xl font-bold shadow-md"
+      class="h-13 flex items-center justify-between px-4 py-2 bg-white text-gray-900 text-xl font-bold shadow-md"
     >
       <h1>{{ boardStore.board.title }}</h1>
     </div>

@@ -11,6 +11,9 @@ model Board {
   id      String   @id @default(cuid())
   title   String
 
+  userId  String
+  user    User @relation(fields: [userId], references: [id])
+
   columns Column[]
 }
 
@@ -38,4 +41,12 @@ model Card {
 
   columnId String
   column   Column @relation(fields: [columnId], references: [id])
+}
+
+model User {
+  id         String   @id @default(cuid())
+  email      String   @unique
+  passwordHash  String
+
+  boards Board[]
 }

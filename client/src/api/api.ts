@@ -1,11 +1,15 @@
 import type { Board } from '@/types/Board'
 import type { Card } from '@/types/Card'
 import type { Column } from '@/types/Column'
+import type { User } from '@/types/User'
 
 const API_URL = 'http://localhost:3000'
 
 async function request<T>(url: string, options?: RequestInit): Promise<T> {
-  const response = await fetch(`${API_URL}${url}`, options)
+  const response = await fetch(`${API_URL}${url}`, {
+    ...options,
+    credentials: 'include',
+  })
 
   if (!response.ok) {
     throw new Error(`API error: ${response.status}`)
@@ -18,8 +22,34 @@ async function request<T>(url: string, options?: RequestInit): Promise<T> {
   return response.json()
 }
 
+export function getCurrentUser(): Promise<User> {
+  return request<User>('/auth/me')
+}
+
+export function login(email: string, password: string): Promise<User> {
+  return request<User>('/auth/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password }),
+  })
+}
+
+export function logout(): Promise<void> {
+  return request<void>('/auth/logout', {
+    method: 'POST',
+  })
+}
+
+export function register(email: string, password: string): Promise<User> {
+  return request<User>('/auth/register', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password }),
+  })
+}
+
 export function getBoards(): Promise<Board[]> {
-  return request<Board[]>('')
+  return request<Board[]>('/boards')
 }
 
 export function getBoard(boardId: string): Promise<Board> {

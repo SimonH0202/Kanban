@@ -10,12 +10,18 @@
   "license": "ISC",
   "dependencies": {
     "@prisma/client": "^6",
+    "bcrypt": "^6.0.0",
+    "cookie-parser": "^1.4.7",
     "cors": "^2",
-    "express": "^5"
+    "express": "^5",
+    "jsonwebtoken": "^9.0.3"
   },
   "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
+    "@types/cookie-parser": "^1.4.10",
     "@types/cors": "^2",
     "@types/express": "^5",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^24",
     "prisma": "^6",
     "tsx": "^4",

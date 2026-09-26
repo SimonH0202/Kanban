@@ -5,18 +5,10 @@ import { formatDateToInputValueString } from '@/util/util'
 import { nextTick, ref } from 'vue'
 import trashIcon from '@/assets/icons/trash.png'
 
-const isTitleActive = ref(false)
-const inputRef = ref<HTMLInputElement | null>(null)
-
-function activateInput() {
-  isTitleActive.value = true
-  nextTick(() => {
-    inputRef.value?.focus()
-  })
-}
-
 const cardEditorStore = useCardEditorStore()
 const boardStore = useBoardStore()
+
+const newTitle = ref(cardEditorStore.currentCard?.title || '')
 
 function closeEditor() {
   cardEditorStore.stopEditing()
@@ -25,7 +17,7 @@ function closeEditor() {
 function saveCard() {
   if (cardEditorStore.currentCard) {
     boardStore.updateCard(cardEditorStore.currentCard.columnId, cardEditorStore.currentCard.id, {
-      title: cardEditorStore.currentCard.title,
+      title: newTitle.value,
       description: cardEditorStore.currentCard.description,
       dueDate: cardEditorStore.currentCard.dueDate,
     })
@@ -55,32 +47,12 @@ function deleteCard() {
             <img :src="trashIcon" alt="Delete Card" class="w-5 h-5" />
           </button>
         </div>
-        <button
-          v-if="!isTitleActive"
-          class="w-full font-bold text-left text-gray-900 text-2xl hover:cursor-pointer"
-          @click="activateInput"
-        >
-          {{ cardEditorStore.currentCard?.title || 'Untitled Card' }}
-        </button>
         <input
-          v-else
-          ref="inputRef"
-          id="card-title"
-          class="w-full text-left text-gray-900 text-2xl font-bold border-gray-300 outline-blue-500 rounded-sm focus:p-2"
+          id="board-title"
+          v-model="newTitle"
+          class="w-full rounded-sm border border-gray-200 bg-white p-2 text-left text-gray-900 outline-blue-500"
           type="text"
-          :value="cardEditorStore.currentCard?.title"
-          @input="
-            (e) => {
-              if (cardEditorStore.currentCard) {
-                cardEditorStore.currentCard.title = (e.target as HTMLInputElement).value
-              }
-            }
-          "
-          @blur="
-            {
-              ;((isTitleActive = false), saveCard())
-            }
-          "
+          @keyup.enter="saveCard"
         />
         <input
           id="card-due-date"
