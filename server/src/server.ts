@@ -514,6 +514,13 @@ app.patch<{ cardId: string }>(
             },
           },
         },
+        include: {
+          column: {
+            select: {
+              boardId: true,
+            },
+          },
+        },
       });
 
       if (!existingCard) {
@@ -542,6 +549,28 @@ app.patch<{ cardId: string }>(
         if (Number.isNaN(parsedDueDate.getTime())) {
           res.status(400).json({
             message: "Invalid due date format",
+          });
+          return;
+        }
+      }
+
+      // Check if the provided tags exist and belong to the same board as the card
+      if (req.body.tags !== undefined) {
+        const tagIds = req.body.tags.map((tag: { id: string }) => tag.id);
+
+        const existingTags = await prisma.tag.findMany({
+          where: {
+            id: {
+              in: tagIds,
+            },
+            boardId: existingCard.column.boardId,
+          },
+        });
+
+        if (existingTags.length !== tagIds.length) {
+          res.status(400).json({
+            message:
+              "One or more tags do not exist or do not belong to the same board as the card",
           });
           return;
         }
