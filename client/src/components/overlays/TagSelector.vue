@@ -98,6 +98,7 @@ function getNonSelectedTags(): Tag[] {
         <div class="flex gap-2">
           <input
             type="text"
+            maxlength="20"
             placeholder="New tag name"
             class="w-full rounded-sm border border-gray-200 bg-white p-2 text-left text-gray-900 outline-blue-500"
             v-model="newTagName"
