@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useBoardStore } from '@/stores/board'
-import { nextTick, ref } from 'vue'
+import { computed, nextTick, ref } from 'vue'
 import SelectableKanbanTag from '../SelectableKanbanTag.vue'
 import type { Tag } from '@/types/Tag.ts'
 
@@ -17,8 +17,17 @@ const newTagColor = ref('#000000')
 
 const props = defineProps<{
   currentTags: Tag[]
-  onSelectTag: (selectedTag: string) => void
 }>()
+
+const emit = defineEmits<{
+  removeTag: [tagId: string]
+  selectTag: [tagId: string]
+}>()
+
+const nonSelectedTags = computed(() => {
+  const selectedTagIds = props.currentTags.map((tag) => tag.id)
+  return boardStore.board.tags.filter((tag) => !selectedTagIds.includes(tag.id))
+})
 
 async function openSelector() {
   isActive.value = true
@@ -48,22 +57,17 @@ async function addNewTag() {
   const newTag = boardStore.board.tags[boardStore.board.tags.length - 1]
 
   if (newTag) {
-    props.onSelectTag(newTag.id)
+    emit('selectTag', newTag.id)
   }
 
   closeSelector()
-}
-
-function getNonSelectedTags(): Tag[] {
-  const selectedTagIds = props.currentTags.map((tag) => tag.id)
-  return boardStore.board.tags.filter((tag) => !selectedTagIds.includes(tag.id))
 }
 </script>
 
 <template>
   <button
     ref="buttonRef"
-    class="rounded-sm px-2 py-1 size-sm text-gray-900 font-bold bg-gray-200 hover:bg-gray-300 text-center hover:cursor-pointer"
+    class="rounded-sm px-2 py-1 size-sm text-gray-900 font-bold bg-gray-200 dark:bg-indigo-900 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-indigo-800 text-center hover:cursor-pointer"
     @click="openSelector"
   >
     +
@@ -79,7 +83,7 @@ function getNonSelectedTags(): Tag[] {
 
     <div
       v-if="isActive"
-      class="fixed z-100 w-2xs rounded-sm bg-white shadow-lg flex flex-wrap gap-2 p-2"
+      class="fixed z-100 w-2xs rounded-sm bg-white dark:bg-gray-800 shadow-lg flex flex-wrap gap-2 p-2"
       :style="{
         left: `${selectorX}px`,
         top: `${selectorY}px`,
@@ -87,12 +91,12 @@ function getNonSelectedTags(): Tag[] {
       }"
     >
       <SelectableKanbanTag
-        v-for="tag in getNonSelectedTags()"
+        v-for="tag in nonSelectedTags"
         :key="tag.id"
         :id="tag.id"
         :name="tag.name"
         :color="tag.color"
-        :onSelectTag="onSelectTag"
+        @selectTag="emit('selectTag', tag.id)"
       />
       <form class="w-full flex flex-col gap-2">
         <div class="flex gap-2">
@@ -100,12 +104,12 @@ function getNonSelectedTags(): Tag[] {
             type="text"
             maxlength="20"
             placeholder="New tag name"
-            class="w-full rounded-sm border border-gray-200 bg-white p-2 text-left text-gray-900 outline-blue-500"
+            class="w-full rounded-sm border border-gray-200 bg-white dark:bg-gray-800 dark:border-gray-700 p-2 text-left text-gray-900 dark:text-gray-300 outline-blue-500"
             v-model="newTagName"
           />
           <input
             type="color"
-            class="h-full aspect-square px-0.5 rounded-sm border border-gray-200 bg-white text-left text-gray-900 outline-blue-50 hover:cursor-pointer"
+            class="h-full aspect-square px-0.5 rounded-sm border border-gray-200 bg-white dark:bg-gray-800 dark:border-gray-700 text-left text-gray-900 outline-blue-500 hover:cursor-pointer"
             v-model="newTagColor"
           />
         </div>

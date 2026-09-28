@@ -71,10 +71,12 @@ onMounted(() => {
 
 <template>
   <main
-    class="w-fit min-w-sm h-screen flex flex-col items-center justify-start gap-2 px-2 bg-white border-r border-gray-300"
+    class="w-fit min-w-sm h-screen flex flex-col items-center justify-start gap-2 px-2 bg-white dark:bg-gray-800 border-r border-gray-300 dark:border-gray-700"
   >
-    <div class="w-full h-fit py-2 flex items-center justify-between border-b border-gray-300">
-      <span class="text-gray-900 text-md font-bold">
+    <div
+      class="w-full h-fit py-2 flex items-center justify-between border-b border-gray-300 dark:border-gray-700"
+    >
+      <span class="text-gray-900 dark:text-gray-300 text-md font-bold">
         {{ authStore.user?.email || 'Boards' }}
       </span>
       <button
@@ -96,7 +98,7 @@ onMounted(() => {
       ></KanbanBoardCard>
     </div>
     <div
-      class="h-8 w-full bg-white rounded-sm shadow-md flex flex-col justify-center gap-2 p-4 hover:bg-gray-200 hover:cursor-pointer"
+      class="h-8 w-full bg-white dark:bg-indigo-900 rounded-sm shadow-md flex flex-col justify-center gap-2 p-4 hover:bg-gray-200 dark:hover:bg-indigo-800 hover:cursor-pointer dark:text-gray-300"
       @click="addBoard"
     >
       + Add Board

@@ -72,13 +72,18 @@ async function removeTag(tagId: string) {
 <template>
   <div class="fixed inset-0 z-50 flex items-center justify-center">
     <button class="fixed inset-0 backdrop-blur-sm" @click="closeEditor"></button>
-    <div class="z-50 bg-white rounded-sm shadow-lg w-200">
-      <div class="text-gray-900 flex justify-end items-center p-4 border-b border-gray-300">
-        <button class="text-lg font-bold hover:scale-105 hover:cursor-pointer" @click="closeEditor">
+    <div class="z-50 bg-white dark:bg-gray-800 rounded-sm shadow-lg w-200">
+      <div
+        class="text-gray-900 flex justify-end items-center p-4 border-b border-gray-300 dark:border-gray-700"
+      >
+        <button
+          class="text-lg font-bold hover:scale-105 hover:cursor-pointer dark:text-gray-300"
+          @click="closeEditor"
+        >
           ✕
         </button>
       </div>
-      <div class="p-8 flex flex-col gap-4 text-gray-900">
+      <div class="p-8 flex flex-col gap-4 text-gray-900 dark:text-gray-300">
         <div class="flex flex-wrap gap-2">
           <KanbanTag
             v-for="tag in cardEditorStore.currentCard?.tags || []"
@@ -88,7 +93,10 @@ async function removeTag(tagId: string) {
             :color="tag.color"
             @remove-tag="(tagId: string) => removeTag(tagId)"
           />
-          <TagSelector :currentTags="cardEditorStore.currentCard?.tags || []" @selectTag="addTag" />
+          <TagSelector
+            :currentTags="cardEditorStore.currentCard?.tags || []"
+            @select-tag="addTag"
+          />
         </div>
         <div class="w-full h-fit flex justify-end">
           <button class="h-fit w-fit hover:cursor-pointer hover:scale-105" @click="deleteCard">
@@ -98,7 +106,7 @@ async function removeTag(tagId: string) {
         <input
           id="board-title"
           v-model="newTitle"
-          class="w-full rounded-sm border border-gray-200 bg-white p-2 text-left text-gray-900 outline-blue-500"
+          class="w-full rounded-sm border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-2 text-left text-gray-900 dark:text-gray-300 outline-blue-500"
           type="text"
           @keyup.enter="async () => await saveCard()"
           @blur="async () => await saveCard()"
@@ -106,7 +114,7 @@ async function removeTag(tagId: string) {
         <input
           id="card-due-date"
           type="date"
-          class="w-32 bg-gray-200 rounded-md py-1 px-2 hover:cursor-pointer"
+          class="w-32 bg-gray-200 dark:bg-indigo-900 dark:text-gray-300 rounded-md py-1 px-2 hover:cursor-pointer"
           :value="formatDateToInputValueString(cardEditorStore.currentCard?.dueDate)"
           @input="
             (e) => {
@@ -124,7 +132,7 @@ async function removeTag(tagId: string) {
         >
         <textarea
           id="card-description"
-          class="w-full min-h-60 p-2 text-left bg-white text-gray-900 text-md rounded-sm border border-gray-200 outline-blue-500"
+          class="w-full min-h-60 p-2 text-left bg-white dark:bg-gray-800 dark:text-gray-300 text-gray-900 text-md rounded-sm border border-gray-200 dark:border-gray-700 outline-blue-500"
           :value="cardEditorStore.currentCard?.description"
           @input="
             (e) => {

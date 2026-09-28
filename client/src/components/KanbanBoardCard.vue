@@ -46,11 +46,11 @@ function renameB() {
 
 <template>
   <div
-    class="h-8 w-full bg-white rounded-sm shadow-md flex flex-row justify-between items-center hover:bg-gray-200 hover:cursor-pointer pr-2"
+    class="h-8 w-full bg-white dark:bg-indigo-900 rounded-sm shadow-md flex flex-row justify-between items-center hover:bg-gray-200 dark:hover:bg-indigo-800 hover:cursor-pointer pr-2 dark:text-gray-300"
   >
     <RouterLink class="p-4 h-8 w-full flex items-center" :to="`/boards/${board.id}`">
       {{ board.title }}
     </RouterLink>
-    <ContextMenu :items="menuItems" :image-src="dotsIconBlack" />
+    <ContextMenu :items="menuItems" :dotColor="'gray-900'" />
   </div>
 </template>

@@ -556,7 +556,18 @@ app.patch<{ cardId: string }>(
 
       // Check if the provided tags exist and belong to the same board as the card
       if (req.body.tags !== undefined) {
-        const tagIds = req.body.tags.map((tag: { id: string }) => tag.id);
+        if (!Array.isArray(req.body.tags)) {
+          res.status(400).json({
+            message: "Tags must be an array",
+          });
+          return;
+        }
+
+        const tagIds = [
+          ...new Set<string>(
+            (req.body.tags as { id: string }[]).map((tag) => tag.id),
+          ),
+        ];
 
         const existingTags = await prisma.tag.findMany({
           where: {

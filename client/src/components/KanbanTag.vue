@@ -6,6 +6,10 @@ defineProps<{
   flatten?: boolean
 }>()
 
+defineEmits<{
+  removeTag: [tagId: string]
+}>()
+
 function setTextColorBasedOnBackground(bgColor: string): string {
   const hex = bgColor.replace('#', '')
   const r = parseInt(hex.substring(0, 2), 16)

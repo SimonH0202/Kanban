@@ -16,11 +16,11 @@ function addColumn() {
 <template>
   <div
     v-if="boardStore.board"
-    class="bg-linear-to-r from-green-500 to-indigo-500 h-screen w-full flex flex-col overflow-hidden"
+    class="bg-linear-to-r from-green-500 to-indigo-500 dark:bg-linear-to-r dark:from-indigo-900 dark:to-rose-900 h-screen w-full flex flex-col overflow-hidden"
   >
     <!-- Header -->
     <div
-      class="h-13 flex items-center justify-between px-4 py-2 bg-white text-gray-900 text-xl font-bold shadow-md"
+      class="h-13 flex items-center justify-between px-4 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-300 text-xl font-bold shadow-md"
     >
       <h1>{{ boardStore.board.title }}</h1>
     </div>

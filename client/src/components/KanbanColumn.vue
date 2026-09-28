@@ -89,7 +89,7 @@ function deleteColumn() {
         @blur="updateTitle"
         @keyup.enter="updateTitle"
       />
-      <ContextMenu :items="menuItems"></ContextMenu>
+      <ContextMenu :items="menuItems" :dotColor="'white'"></ContextMenu>
     </div>
     <draggable
       v-model="data.cards"

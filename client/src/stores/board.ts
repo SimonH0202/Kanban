@@ -4,8 +4,6 @@ import type { Tag } from '@/types/Tag'
 import { defineStore } from 'pinia'
 import { reactive } from 'vue'
 
-const API_URL = 'http://localhost:3000'
-
 export const useBoardStore = defineStore('board', () => {
   const board = reactive<Board>({
     id: '',

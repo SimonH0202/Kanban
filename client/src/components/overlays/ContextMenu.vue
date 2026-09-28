@@ -5,7 +5,7 @@ import dotsIcon from '@/assets/icons/dots.png'
 
 defineProps<{
   items: ContextMenuItem[]
-  imageSrc?: string
+  dotColor?: string
 }>()
 
 const isActive = ref(false)
@@ -40,7 +40,20 @@ function selectItem(item: ContextMenuItem) {
 <template>
   <!-- Stays inside the Kanban column -->
   <button ref="buttonRef" class="h-4 w-4 hover:scale-110 hover:cursor-pointer" @click="openMenu">
-    <img :src="imageSrc || dotsIcon" alt="Context Menu" />
+    <div class="flex flex-col gap-0.5 items-center justify-center">
+      <div
+        class="h-1 w-1 rounded-full bg-gray-900 dark:bg-gray-300"
+        :style="{ backgroundColor: dotColor }"
+      ></div>
+      <div
+        class="h-1 w-1 rounded-full bg-gray-900 dark:bg-gray-300"
+        :style="{ backgroundColor: dotColor }"
+      ></div>
+      <div
+        class="h-1 w-1 rounded-full bg-gray-900 dark:bg-gray-300"
+        :style="{ backgroundColor: dotColor }"
+      ></div>
+    </div>
   </button>
 
   <!-- Gets moved to <body> -->
@@ -53,7 +66,7 @@ function selectItem(item: ContextMenuItem) {
 
     <div
       v-if="isActive"
-      class="fixed z-100 w-48 rounded-sm bg-white shadow-lg"
+      class="fixed z-100 w-48 rounded-sm bg-white dark:bg-gray-800 shadow-lg"
       :style="{
         left: `${menuX}px`,
         top: `${menuY}px`,
@@ -63,9 +76,9 @@ function selectItem(item: ContextMenuItem) {
       <button
         v-for="item in items"
         :key="item.label"
-        class="w-full p-2 text-left text-gray-900 hover:bg-gray-100 rounded-sm"
+        class="w-full p-2 text-left text-gray-900 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-sm"
         :class="{
-          'text-red-500 hover:bg-red-100 rounded-sm': item.danger,
+          'text-red-500 dark:text-red-400 hover:bg-red-100 rounded-sm': item.danger,
         }"
         @click="selectItem(item)"
       >

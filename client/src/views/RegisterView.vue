@@ -40,10 +40,10 @@ async function submit() {
 
 <template>
   <main
-    class="flex min-h-screen items-center justify-center bg-linear-to-r from-green-500 to-indigo-500"
+    class="flex min-h-screen items-center justify-center bg-linear-to-r from-green-500 to-indigo-500 dark:bg-linear-to-r dark:from-indigo-900 dark:to-rose-900"
   >
     <form
-      class="flex w-full max-w-sm flex-col gap-4 rounded-lg bg-white p-8 shadow-md"
+      class="flex w-full max-w-sm flex-col gap-4 rounded-lg bg-white dark:bg-gray-800 p-8 shadow-md dark:text-gray-300"
       @submit.prevent="submit"
     >
       <div>
@@ -59,7 +59,7 @@ async function submit() {
           type="email"
           autocomplete="email"
           required
-          class="rounded-sm border border-gray-300 p-2 outline-blue-500"
+          class="rounded-sm border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 p-2 text-gray-900 dark:text-gray-300 outline-blue-500"
         />
       </div>
 
@@ -71,7 +71,7 @@ async function submit() {
           type="password"
           autocomplete="new-password"
           required
-          class="rounded-sm border border-gray-300 p-2 outline-blue-500"
+          class="rounded-sm border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 p-2 text-gray-900 dark:text-gray-300 outline-blue-500"
         />
       </div>
 
@@ -83,7 +83,7 @@ async function submit() {
           type="password"
           autocomplete="new-password"
           required
-          class="rounded-sm border border-gray-300 p-2 outline-blue-500"
+          class="rounded-sm border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 p-2 text-gray-900 dark:text-gray-300 outline-blue-500"
         />
       </div>
 

@@ -34,20 +34,22 @@ async function saveBoard() {
     ></button>
 
     <!-- Editor -->
-    <div class="z-50 w-200 rounded-sm bg-white shadow-lg">
+    <div class="z-50 w-200 rounded-sm bg-white dark:bg-gray-800 shadow-lg">
       <!-- Header -->
-      <div class="flex items-center justify-end border-b border-gray-300 p-4 text-gray-900">
+      <div
+        class="flex items-center justify-end border-b border-gray-300 dark:border-gray-700 p-4 text-gray-900 dark:text-gray-300"
+      >
         <button class="text-lg font-bold hover:scale-105 hover:cursor-pointer" @click="closeEditor">
           ✕
         </button>
       </div>
 
       <!-- Content -->
-      <div class="flex flex-col gap-4 p-8 text-gray-900">
+      <div class="flex flex-col gap-4 p-8 text-gray-900 dark:text-gray-300">
         <input
           id="board-title"
           v-model="newTitle"
-          class="w-full rounded-sm border border-gray-200 bg-white p-2 text-left text-gray-900 outline-blue-500"
+          class="w-full rounded-sm border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-2 text-left text-gray-900 dark:text-gray-300 outline-blue-500"
           type="text"
           @keyup.enter="saveBoard"
         />
@@ -55,7 +57,7 @@ async function saveBoard() {
         <!-- Actions -->
         <div class="mt-4 flex justify-end gap-2">
           <button
-            class="rounded-md bg-gray-200 px-4 py-2 font-medium text-gray-800 hover:scale-105 hover:cursor-pointer hover:bg-gray-300"
+            class="rounded-md bg-gray-200 dark:bg-gray-600 px-4 py-2 font-medium text-gray-800 dark:text-gray-300 hover:scale-105 hover:cursor-pointer hover:bg-gray-300"
             @click="closeEditor"
           >
             Cancel
