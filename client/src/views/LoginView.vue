@@ -22,8 +22,13 @@ async function submit() {
 
     router.push('/')
   } catch (err: any) {
-    error.value = 'Invalid email or password'
-    console.error(err)
+    if (err.response) {
+      error.value = err.response.data.message || 'Invalid email or password.'
+      console.error(err.response.data)
+    } else {
+      error.value = 'An error occurred. Please try again later.'
+      console.error(err)
+    }
   } finally {
     isLoading.value = false
   }
