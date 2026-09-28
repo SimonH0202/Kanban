@@ -50,10 +50,10 @@ export const useBoardStore = defineStore('board', () => {
     columnId: string,
     cardId: string,
     updatedCard: {
-      title?: string
+      title: string
       description?: string
       dueDate?: Date | string | null
-      tags?: Tag[]
+      tags: Tag[]
     },
   ) {
     const savedCard = await api.updateCard(cardId, updatedCard)

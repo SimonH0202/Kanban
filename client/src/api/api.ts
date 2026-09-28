@@ -114,7 +114,7 @@ export function createCard(
 
 export function updateCard(
   cardId: string,
-  card: { title?: string; description?: string; dueDate?: Date | string | null; tags?: Tag[] },
+  card: { title: string; description?: string; dueDate?: Date | string | null; tags: Tag[] },
 ): Promise<Card> {
   return request<Card>(`/cards/${cardId}`, {
     method: 'PATCH',

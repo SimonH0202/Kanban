@@ -13,7 +13,7 @@ defineProps<{
   createdAt?: Date | string | null
   updatedAt?: Date | string | null
   dueDate?: Date | string | null
-  tags?: Tag[]
+  tags: Tag[]
 }>()
 
 const cardEditorStore = useCardEditorStore()

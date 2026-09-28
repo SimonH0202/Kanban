@@ -18,14 +18,18 @@ function closeEditor() {
   cardEditorStore.stopEditing()
 }
 
-function saveCard() {
+async function saveCard() {
   if (cardEditorStore.currentCard) {
-    boardStore.updateCard(cardEditorStore.currentCard.columnId, cardEditorStore.currentCard.id, {
-      title: newTitle.value,
-      description: cardEditorStore.currentCard.description,
-      dueDate: cardEditorStore.currentCard.dueDate,
-      tags: cardEditorStore.currentCard.tags,
-    })
+    await boardStore.updateCard(
+      cardEditorStore.currentCard.columnId,
+      cardEditorStore.currentCard.id,
+      {
+        title: newTitle.value,
+        description: cardEditorStore.currentCard.description,
+        dueDate: cardEditorStore.currentCard.dueDate,
+        tags: cardEditorStore.currentCard.tags,
+      },
+    )
   }
 }
 
@@ -45,18 +49,23 @@ function deleteCard() {
   )
 }
 
-function addTag(id: string) {
+async function addTag(id: string) {
   const tag = boardStore.board?.tags.find((t) => t.id === id)
 
   if (!tag || !cardEditorStore.currentCard) return
 
-  if (!cardEditorStore.currentCard.tags) {
-    cardEditorStore.currentCard.tags = []
-  }
   cardEditorStore.currentCard.tags?.push(tag)
-  saveCard()
+  await saveCard()
+}
 
-  console.log(cardEditorStore.currentCard?.tags)
+async function removeTag(tagId: string) {
+  if (cardEditorStore.currentCard) {
+    cardEditorStore.currentCard.tags = cardEditorStore.currentCard.tags?.filter(
+      (t) => t.id !== tagId,
+    )
+    await saveCard()
+    console.log(cardEditorStore.currentCard?.tags)
+  }
 }
 </script>
 
@@ -77,17 +86,7 @@ function addTag(id: string) {
             :id="tag.id"
             :name="tag.name"
             :color="tag.color"
-            @remove-tag="
-              (tagId: string) => {
-                if (cardEditorStore.currentCard) {
-                  cardEditorStore.currentCard.tags = cardEditorStore.currentCard.tags?.filter(
-                    (t) => t.id !== tagId,
-                  )
-                  saveCard()
-                  console.log(cardEditorStore.currentCard?.tags)
-                }
-              }
-            "
+            @remove-tag="(tagId: string) => removeTag(tagId)"
           />
           <TagSelector :currentTags="cardEditorStore.currentCard?.tags || []" @selectTag="addTag" />
         </div>
@@ -101,8 +100,8 @@ function addTag(id: string) {
           v-model="newTitle"
           class="w-full rounded-sm border border-gray-200 bg-white p-2 text-left text-gray-900 outline-blue-500"
           type="text"
-          @keyup.enter="saveCard"
-          @blur="saveCard"
+          @keyup.enter="async () => await saveCard()"
+          @blur="async () => await saveCard()"
         />
         <input
           id="card-due-date"
@@ -118,7 +117,7 @@ function addTag(id: string) {
               }
             }
           "
-          @blur="saveCard"
+          @blur="async () => await saveCard()"
         />
         <label for="card-description" class="text-md font-medium text-gray-800 pt-8"
           >Description</label
@@ -134,7 +133,7 @@ function addTag(id: string) {
               }
             }
           "
-          @blur="saveCard"
+          @blur="async () => await saveCard()"
         ></textarea>
       </div>
     </div>

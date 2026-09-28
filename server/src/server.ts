@@ -483,6 +483,9 @@ app.post<{ columnId: string }>(
           columnId: column.id,
           position: position,
         },
+        include: {
+          tags: true,
+        },
       });
 
       res.status(201).json(card);

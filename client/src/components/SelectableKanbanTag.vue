@@ -22,7 +22,7 @@ function setTextColorBasedOnBackground(bgColor: string): string {
 
 <template>
   <button
-    class="inline-block rounded-sm px-2 py-1 text-white h-sm w-fit text-center"
+    class="inline-block rounded-sm px-2 py-1 text-white h-sm w-fit text-center hover:cursor-pointer hover:scale-105 transition-transform duration-200"
     :style="{ backgroundColor: color, color: setTextColorBasedOnBackground(color) }"
     @click="onSelectTag(id)"
   >
