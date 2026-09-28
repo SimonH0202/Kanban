@@ -25,15 +25,16 @@ export const useBoardStore = defineStore('board', () => {
     board.columns.forEach((column) => {
       column.cards.sort((a, b) => a.position - b.position)
     })
-
-    console.log('API BOARD:', data)
-    console.log('BOARD TAGS:', data.tags)
-    console.log('FIRST CARD TAGS:', data.columns[0]?.cards[0]?.tags, data.columns[0]?.cards[0]?.id)
   }
 
-  async function updateBoard(newTitle: string) {
-    const updatedBoard = await api.updateBoard(board.id, { title: newTitle })
+  async function updateBoard(boardId: string, newTitle: string) {
+    const updatedBoard = await api.updateBoard(boardId, { title: newTitle })
     board.title = updatedBoard.title
+  }
+
+  async function deleteBoard(boardId: string) {
+    await api.deleteBoard(boardId)
+    resetBoard()
   }
 
   async function addCard(columnId: string, card: { title: string; description?: string }) {
@@ -127,12 +128,15 @@ export const useBoardStore = defineStore('board', () => {
     board.id = ''
     board.title = ''
     board.columns = []
+    board.tags = []
   }
 
   return {
     board,
     loadBoard,
     updateBoard,
+    resetBoard,
+    deleteBoard,
     addCard,
     updateCard,
     moveCard,
@@ -141,6 +145,5 @@ export const useBoardStore = defineStore('board', () => {
     addColumn,
     updateColumn,
     deleteColumn,
-    resetBoard,
   }
 })

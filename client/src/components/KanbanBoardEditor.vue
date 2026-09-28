@@ -16,7 +16,7 @@ function closeEditor() {
 async function saveBoard() {
   if (!boardEditorStore.currentBoard) return
 
-  await boardStore.updateBoard(newTitle.value)
+  await boardStore.updateBoard(boardEditorStore.currentBoard.id, newTitle.value)
 
   boardEditorStore.currentBoard.title = newTitle.value
 

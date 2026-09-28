@@ -35,8 +35,7 @@ const menuItems: ContextMenuItem[] = [
   },
 ]
 
-async function deleteB() {
-  await deleteBoard(props.board.id)
+function deleteB() {
   emit('delete', props.board.id)
 }
 

@@ -7,11 +7,13 @@ import type { BoardListItem } from '@/types/Items'
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { useBoardStore } from '@/stores/board'
 
 const router = useRouter()
 const authStore = useAuthStore()
 
 const boardEditorStore = useBoardEditorStore()
+const boardStore = useBoardStore()
 
 const boards = ref<BoardListItem[]>([])
 const isLoading = ref(false)
@@ -44,8 +46,17 @@ async function addBoard() {
   loadBoards()
 }
 
-function removeBoard(boardId: string) {
+function deleteBoard(boardId: string) {
   boards.value = boards.value.filter((board) => board.id !== boardId)
+
+  const currentBoardId = boardStore.board?.id
+  if (currentBoardId === boardId) {
+    router.push('/')
+  }
+
+  boardStore.deleteBoard(boardId)
+
+  loadBoards()
 }
 
 async function logout() {
@@ -81,7 +92,7 @@ onMounted(() => {
       <KanbanBoardCard
         v-for="board in boards"
         :board="board"
-        @delete="removeBoard"
+        @delete="deleteBoard"
       ></KanbanBoardCard>
     </div>
     <div
