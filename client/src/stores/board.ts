@@ -1,5 +1,6 @@
 import * as api from '@/api/api'
 import type { Board } from '@/types/Board'
+import type { Tag } from '@/types/Tag'
 import { defineStore } from 'pinia'
 import { reactive } from 'vue'
 
@@ -10,6 +11,7 @@ export const useBoardStore = defineStore('board', () => {
     id: '',
     title: '',
     columns: [],
+    tags: [],
   })
 
   async function loadBoard(boardId: string) {
@@ -18,10 +20,15 @@ export const useBoardStore = defineStore('board', () => {
     board.id = data.id
     board.title = data.title
     board.columns = data.columns
+    board.tags = data.tags
 
     board.columns.forEach((column) => {
       column.cards.sort((a, b) => a.position - b.position)
     })
+
+    console.log('API BOARD:', data)
+    console.log('BOARD TAGS:', data.tags)
+    console.log('FIRST CARD TAGS:', data.columns[0]?.cards[0]?.tags, data.columns[0]?.cards[0]?.id)
   }
 
   async function updateBoard(newTitle: string) {
@@ -46,6 +53,7 @@ export const useBoardStore = defineStore('board', () => {
       title?: string
       description?: string
       dueDate?: Date | string | null
+      tags?: Tag[]
     },
   ) {
     const savedCard = await api.updateCard(cardId, updatedCard)
@@ -80,6 +88,12 @@ export const useBoardStore = defineStore('board', () => {
     if (!column) return
 
     column.cards = column.cards.filter((card) => card.id !== cardId)
+  }
+
+  async function addTag(name: string, color: string) {
+    const createdTag = await api.createTag(board.id, name, color)
+
+    board.tags.push(createdTag)
   }
 
   async function addColumn(column: { title: string }) {
@@ -122,6 +136,7 @@ export const useBoardStore = defineStore('board', () => {
     addCard,
     updateCard,
     moveCard,
+    addTag,
     deleteCard,
     addColumn,
     updateColumn,

@@ -4,7 +4,7 @@ import { nextTick, ref } from 'vue'
 import { VueDraggableNext } from 'vue-draggable-next'
 import KanbanCard from './KanbanCard.vue'
 import { useBoardStore } from '@/stores/board.ts'
-import ContextMenu from './ContextMenu.vue'
+import ContextMenu from '../components/overlays/ContextMenu.vue'
 import type { ContextMenuItem } from '@/types/Items.ts'
 import { useConfirmationStore } from '@/stores/confirmation.ts'
 
@@ -112,6 +112,7 @@ function deleteColumn() {
         :dueDate="card.dueDate"
         :createdAt="card.createdAt"
         :updatedAt="card.updatedAt"
+        :tags="card.tags"
       />
     </draggable>
     <button @click="addCard" class="text-white hover:scale-105 hover:cursor-pointer p-2">

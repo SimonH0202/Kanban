@@ -5,6 +5,8 @@ import { useConfirmationStore } from '@/stores/confirmation'
 import { formatDateToInputValueString } from '@/util/util'
 import { ref } from 'vue'
 import trashIcon from '@/assets/icons/trash.png'
+import KanbanTag from './KanbanTag.vue'
+import TagSelector from '../components/overlays/TagSelector.vue'
 
 const cardEditorStore = useCardEditorStore()
 const confirmationStore = useConfirmationStore()
@@ -22,6 +24,7 @@ function saveCard() {
       title: newTitle.value,
       description: cardEditorStore.currentCard.description,
       dueDate: cardEditorStore.currentCard.dueDate,
+      tags: cardEditorStore.currentCard.tags,
     })
   }
 }
@@ -41,6 +44,20 @@ function deleteCard() {
     () => {},
   )
 }
+
+function addTag(id: string) {
+  const tag = boardStore.board?.tags.find((t) => t.id === id)
+
+  if (!tag || !cardEditorStore.currentCard) return
+
+  if (!cardEditorStore.currentCard.tags) {
+    cardEditorStore.currentCard.tags = []
+  }
+  cardEditorStore.currentCard.tags?.push(tag)
+  saveCard()
+
+  console.log(cardEditorStore.currentCard?.tags)
+}
 </script>
 
 <template>
@@ -53,6 +70,27 @@ function deleteCard() {
         </button>
       </div>
       <div class="p-8 flex flex-col gap-4 text-gray-900">
+        <div class="flex flex-wrap gap-2">
+          <KanbanTag
+            v-for="tag in cardEditorStore.currentCard?.tags || []"
+            :key="tag.id"
+            :id="tag.id"
+            :name="tag.name"
+            :color="tag.color"
+            @remove-tag="
+              (tagId: string) => {
+                if (cardEditorStore.currentCard) {
+                  cardEditorStore.currentCard.tags = cardEditorStore.currentCard.tags?.filter(
+                    (t) => t.id !== tagId,
+                  )
+                  saveCard()
+                  console.log(cardEditorStore.currentCard?.tags)
+                }
+              }
+            "
+          />
+          <TagSelector :currentTags="cardEditorStore.currentCard?.tags || []" @selectTag="addTag" />
+        </div>
         <div class="w-full h-fit flex justify-end">
           <button class="h-fit w-fit hover:cursor-pointer hover:scale-105" @click="deleteCard">
             <img :src="trashIcon" alt="Delete Card" class="w-5 h-5" />

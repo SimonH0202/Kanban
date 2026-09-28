@@ -1,11 +1,10 @@
 <script setup lang="ts">
 import type { BoardListItem, ContextMenuItem } from '@/types/Items'
-import ContextMenu from './ContextMenu.vue'
 import { deleteBoard } from '@/api/api.ts'
 import { useBoardEditorStore } from '@/stores/boardEditor.ts'
 import { useConfirmationStore } from '@/stores/confirmation.ts'
 import dotsIconBlack from '@/assets/icons/dots-black.png'
-
+import ContextMenu from '../components/overlays/ContextMenu.vue'
 const boardEditorStore = useBoardEditorStore()
 const confirmationStore = useConfirmationStore()
 

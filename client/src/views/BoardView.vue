@@ -6,7 +6,7 @@ import { useBoardStore } from '@/stores/board'
 import { ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import KanbanBoardList from '@/components/KanbanBoardList.vue'
-import ActionConfirmation from '@/components/ActionConfirmation.vue'
+import ActionConfirmation from '@/components/overlays/ActionConfirmation.vue'
 
 const boardData = useBoardStore()
 const cardEditorStore = useCardEditorStore()

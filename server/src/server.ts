@@ -195,9 +195,13 @@ app.get<{ id: string }>("/boards/:id", requireAuth, async (req, res) => {
               orderBy: {
                 position: "asc",
               },
+              include: {
+                tags: true,
+              },
             },
           },
         },
+        tags: true,
       },
     });
 
@@ -275,6 +279,12 @@ app.delete<{ id: string }>("/boards/:id", requireAuth, async (req, res) => {
     });
 
     await prisma.column.deleteMany({
+      where: {
+        boardId: board.id,
+      },
+    });
+
+    await prisma.tag.deleteMany({
       where: {
         boardId: board.id,
       },
@@ -541,7 +551,19 @@ app.patch<{ cardId: string }>(
         data: {
           title: req.body.title,
           description: req.body.description,
+          ...(req.body.tags !== undefined
+            ? {
+                tags: {
+                  set: req.body.tags.map((tag: { id: string }) => ({
+                    id: tag.id,
+                  })),
+                },
+              }
+            : {}),
           ...(parsedDueDate !== undefined ? { dueDate: parsedDueDate } : {}),
+        },
+        include: {
+          tags: true,
         },
       });
 
@@ -675,6 +697,98 @@ app.delete<{ cardId: string }>(
       console.error(error);
       res.status(500).json({
         message: "Failed to delete card",
+      });
+    }
+  },
+);
+
+// Create a new tag
+app.post<{ boardId: string }>(
+  "/boards/:boardId/tags",
+  requireAuth,
+  async (req, res) => {
+    try {
+      const { name, color } = req.body;
+
+      // Make sure the board belongs to the logged-in user
+      const board = await prisma.board.findFirst({
+        where: {
+          id: req.params.boardId,
+          userId: req.userId!,
+        },
+      });
+
+      if (!board) {
+        res.status(404).json({
+          message: "Board not found",
+        });
+        return;
+      }
+
+      if (typeof name !== "string" || name.trim() === "") {
+        res.status(400).json({
+          message: "A tag name is required",
+        });
+        return;
+      }
+
+      if (typeof color !== "string" || color.trim() === "") {
+        res.status(400).json({
+          message: "A tag color is required",
+        });
+        return;
+      }
+
+      const tag = await prisma.tag.create({
+        data: {
+          name,
+          color,
+          boardId: req.params.boardId,
+        },
+      });
+
+      res.json(tag);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({
+        message: "Failed to create tag",
+      });
+    }
+  },
+);
+
+// Get all tags for a board
+app.get<{ boardId: string }>(
+  "/boards/:boardId/tags",
+  requireAuth,
+  async (req, res) => {
+    try {
+      // Make sure the board belongs to the logged-in user
+      const board = await prisma.board.findFirst({
+        where: {
+          id: req.params.boardId,
+          userId: req.userId!,
+        },
+      });
+
+      if (!board) {
+        res.status(404).json({
+          message: "Board not found",
+        });
+        return;
+      }
+
+      const tags = await prisma.tag.findMany({
+        where: {
+          boardId: req.params.boardId,
+        },
+      });
+
+      res.json(tags);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({
+        message: "Failed to get tags",
       });
     }
   },

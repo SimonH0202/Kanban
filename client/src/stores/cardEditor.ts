@@ -9,6 +9,7 @@ export const useCardEditorStore = defineStore('cardEditor', () => {
   function startEditing(card: Card) {
     isEditing.value = true
     currentCard.value = card
+    console.log('startEditing', card)
   }
   function stopEditing() {
     isEditing.value = false

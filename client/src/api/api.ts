@@ -1,6 +1,7 @@
 import type { Board } from '@/types/Board'
 import type { Card } from '@/types/Card'
 import type { Column } from '@/types/Column'
+import type { Tag } from '@/types/Tag'
 import type { User } from '@/types/User'
 
 const API_URL = 'http://localhost:3000'
@@ -113,7 +114,7 @@ export function createCard(
 
 export function updateCard(
   cardId: string,
-  card: { title?: string; description?: string; dueDate?: Date | string | null },
+  card: { title?: string; description?: string; dueDate?: Date | string | null; tags?: Tag[] },
 ): Promise<Card> {
   return request<Card>(`/cards/${cardId}`, {
     method: 'PATCH',
@@ -133,5 +134,13 @@ export function moveCard(cardId: string, columnId: string, position: number): Pr
 export function deleteCard(cardId: string): Promise<void> {
   return request<void>(`/cards/${cardId}`, {
     method: 'DELETE',
+  })
+}
+
+export function createTag(boardId: string, name: string, color: string): Promise<Tag> {
+  return request<Tag>(`/boards/${boardId}/tags`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, color }),
   })
 }
