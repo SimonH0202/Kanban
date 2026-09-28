@@ -1,5 +1,6 @@
 import * as api from '@/api/api'
 import type { Board } from '@/types/Board'
+import type { BoardMember } from '@/types/BoardMember'
 import type { Tag } from '@/types/Tag'
 import { defineStore } from 'pinia'
 import { reactive } from 'vue'
@@ -33,6 +34,19 @@ export const useBoardStore = defineStore('board', () => {
   async function deleteBoard(boardId: string) {
     await api.deleteBoard(boardId)
     resetBoard()
+  }
+
+  async function getAllMembers(boardId: string): Promise<BoardMember[]> {
+    const members = await api.getAllMembers(boardId)
+    return members
+  }
+
+  async function addMemberToBoard(boardId: string, email: string) {
+    await api.addMemberToBoard(boardId, email)
+  }
+
+  async function removeMemberFromBoard(boardId: string, memberId: string) {
+    await api.removeMemberFromBoard(boardId, memberId)
   }
 
   async function addCard(columnId: string, card: { title: string; description?: string }) {
@@ -135,6 +149,9 @@ export const useBoardStore = defineStore('board', () => {
     updateBoard,
     resetBoard,
     deleteBoard,
+    getAllMembers,
+    addMemberToBoard,
+    removeMemberFromBoard,
     addCard,
     updateCard,
     moveCard,

@@ -1,4 +1,5 @@
 import type { Board } from '@/types/Board'
+import type { BoardMember } from '@/types/BoardMember'
 import type { Card } from '@/types/Card'
 import type { Column } from '@/types/Column'
 import type { Tag } from '@/types/Tag'
@@ -13,7 +14,19 @@ async function request<T>(url: string, options?: RequestInit): Promise<T> {
   })
 
   if (!response.ok) {
-    throw new Error(`API error: ${response.status}`)
+    let message = response.statusText
+
+    try {
+      const data = await response.json()
+
+      if (typeof data.message === 'string') {
+        message = data.message
+      }
+    } catch {
+      // Ignore JSON parse errors
+    }
+
+    throw new Error(message)
   }
 
   if (response.status === 204) {
@@ -76,6 +89,24 @@ export function createBoard(title: string): Promise<Board> {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ title }),
+  })
+}
+
+export function getAllMembers(boardId: string): Promise<BoardMember[]> {
+  return request<BoardMember[]>(`/boards/${boardId}/members`)
+}
+
+export function addMemberToBoard(boardId: string, email: string): Promise<void> {
+  return request<void>(`/boards/${boardId}/members`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email }),
+  })
+}
+
+export function removeMemberFromBoard(boardId: string, memberId: string): Promise<void> {
+  return request<void>(`/boards/${boardId}/members/${memberId}`, {
+    method: 'DELETE',
   })
 }
 

@@ -78,7 +78,7 @@ function selectItem(item: ContextMenuItem) {
         :key="item.label"
         class="w-full p-2 text-left text-gray-900 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-sm"
         :class="{
-          'text-red-500 dark:text-red-400 hover:bg-red-100 rounded-sm': item.danger,
+          'text-red-500 hover:bg-red-100 rounded-sm': item.danger,
         }"
         @click="selectItem(item)"
       >

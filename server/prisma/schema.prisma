@@ -11,11 +11,12 @@ model Board {
   id    String @id @default(cuid())
   title String
 
-  userId String
-  user   User   @relation(fields: [userId], references: [id])
-  tags   Tag[]
-
+  ownerId String
+  owner   User     @relation("BoardOwner", fields: [ownerId], references: [id])
+  tags    Tag[]
   columns Column[]
+
+  members BoardMember[]
 }
 
 model Column {
@@ -50,7 +51,8 @@ model User {
   email        String @unique
   passwordHash String
 
-  boards Board[]
+  ownedBoards      Board[]       @relation("BoardOwner")
+  boardMemberships BoardMember[]
 }
 
 model Tag {
@@ -60,4 +62,16 @@ model Tag {
   boardId String
   board   Board  @relation(fields: [boardId], references: [id])
   cards   Card[]
+}
+
+model BoardMember {
+  userId  String
+  boardId String
+
+  board Board @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  joinedAt DateTime @default(now())
+
+  @@id([boardId, userId])
 }

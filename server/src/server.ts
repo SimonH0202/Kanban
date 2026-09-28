@@ -5,6 +5,10 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import cookieParser from "cookie-parser";
 import { requireAuth } from "./middleware/auth.js";
+import {
+  canAccessBoard,
+  isBoardOwner,
+} from "./authorization/boardAuthorization.js";
 
 const app = express();
 
@@ -137,7 +141,18 @@ app.get("/boards", requireAuth, async (req, res) => {
   try {
     const boards = await prisma.board.findMany({
       where: {
-        userId: req.userId!,
+        OR: [
+          {
+            ownerId: req.userId!,
+          },
+          {
+            members: {
+              some: {
+                userId: req.userId!,
+              },
+            },
+          },
+        ],
       },
       select: {
         id: true,
@@ -165,7 +180,7 @@ app.post("/boards", requireAuth, async (req, res) => {
     const board = await prisma.board.create({
       data: {
         title,
-        userId: req.userId!,
+        ownerId: req.userId!,
       },
     });
 
@@ -183,7 +198,18 @@ app.get<{ id: string }>("/boards/:id", requireAuth, async (req, res) => {
     const board = await prisma.board.findFirst({
       where: {
         id: req.params.id,
-        userId: req.userId!,
+        OR: [
+          {
+            ownerId: req.userId!,
+          },
+          {
+            members: {
+              some: {
+                userId: req.userId!,
+              },
+            },
+          },
+        ],
       },
       include: {
         columns: {
@@ -230,7 +256,7 @@ app.patch<{ id: string }>("/boards/:id", requireAuth, async (req, res) => {
     const existingBoard = await prisma.board.findFirst({
       where: {
         id: req.params.id,
-        userId: req.userId!,
+        ownerId: req.userId!,
       },
     });
 
@@ -261,7 +287,7 @@ app.delete<{ id: string }>("/boards/:id", requireAuth, async (req, res) => {
     const board = await prisma.board.findFirst({
       where: {
         id: req.params.id,
-        userId: req.userId!,
+        ownerId: req.userId!,
       },
     });
 
@@ -303,6 +329,172 @@ app.delete<{ id: string }>("/boards/:id", requireAuth, async (req, res) => {
   }
 });
 
+// Add a member to a board
+app.post<{ boardId: string }>(
+  "/boards/:boardId/members",
+  requireAuth,
+  async (req, res) => {
+    try {
+      const { email } = req.body;
+
+      if (typeof email !== "string" || email.trim() === "") {
+        res.status(400).json({ message: "A valid email is required" });
+        return;
+      }
+
+      const board = await prisma.board.findFirst({
+        where: {
+          id: req.params.boardId,
+          ownerId: req.userId!,
+        },
+      });
+
+      if (!board) {
+        res.status(404).json({ message: "Board not found" });
+        return;
+      }
+
+      const user = await prisma.user.findUnique({
+        where: {
+          email,
+        },
+      });
+
+      if (!user) {
+        res.status(404).json({ message: "User not found" });
+        return;
+      }
+
+      if (user.id === board.ownerId) {
+        res
+          .status(400)
+          .json({ message: "Cannot add the board owner as a member" });
+        return;
+      }
+
+      const existingMember = await prisma.boardMember.findUnique({
+        where: {
+          boardId_userId: {
+            boardId: board.id,
+            userId: user.id,
+          },
+        },
+      });
+
+      if (existingMember) {
+        res
+          .status(400)
+          .json({ message: "User is already a member of this board" });
+        return;
+      }
+
+      const member = await prisma.boardMember.create({
+        data: {
+          boardId: board.id,
+          userId: user.id,
+        },
+        include: {
+          user: {
+            select: {
+              id: true,
+              email: true,
+            },
+          },
+        },
+      });
+
+      res.status(201).json(member);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Failed to add board member" });
+    }
+  },
+);
+
+// Get all members of a board
+app.get<{ boardId: string }>(
+  "/boards/:boardId/members",
+  requireAuth,
+  async (req, res) => {
+    try {
+      const hasAccess = canAccessBoard(req.userId!, req.params.boardId);
+
+      if (!hasAccess) {
+        res.status(403).json({ message: "Access denied" });
+        return;
+      }
+
+      const members = await prisma.boardMember.findMany({
+        where: {
+          boardId: req.params.boardId,
+        },
+        include: {
+          user: {
+            select: {
+              id: true,
+              email: true,
+            },
+          },
+        },
+        orderBy: {
+          joinedAt: "asc",
+        },
+      });
+
+      res.json(members);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Failed to get board members" });
+    }
+  },
+);
+
+// Remove a member from a board
+app.delete<{ boardId: string; userId: string }>(
+  "/boards/:boardId/members/:userId",
+  requireAuth,
+  async (req, res) => {
+    try {
+      const { boardId, userId } = req.params;
+
+      const isOwner = await isBoardOwner(req.userId!, boardId);
+
+      if (!isOwner) {
+        res.status(403).json({ message: "Access denied" });
+        return;
+      }
+
+      const member = await prisma.boardMember.findUnique({
+        where: {
+          boardId_userId: {
+            boardId,
+            userId,
+          },
+        },
+      });
+
+      if (!member) {
+        res.status(404).json({ message: "Member not found" });
+        return;
+      }
+
+      await prisma.boardMember.delete({
+        where: {
+          boardId_userId: {
+            boardId,
+            userId,
+          },
+        },
+      });
+
+      res.json(member);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Failed to remove board member" });
+    }
+  },
+);
+
 // Create a new column
 
 app.post<{ boardId: string }>(
@@ -316,7 +508,18 @@ app.post<{ boardId: string }>(
       const board = await prisma.board.findFirst({
         where: {
           id: req.params.boardId,
-          userId: req.userId!,
+          OR: [
+            {
+              ownerId: req.userId!,
+            },
+            {
+              members: {
+                some: {
+                  userId: req.userId!,
+                },
+              },
+            },
+          ],
         },
       });
 
@@ -370,9 +573,22 @@ app.patch<{ id: string }>("/columns/:id", requireAuth, async (req, res) => {
     const column = await prisma.column.findFirst({
       where: {
         id: req.params.id,
-        board: {
-          userId: req.userId!,
-        },
+        OR: [
+          {
+            board: {
+              ownerId: req.userId!,
+            },
+          },
+          {
+            board: {
+              members: {
+                some: {
+                  userId: req.userId!,
+                },
+              },
+            },
+          },
+        ],
       },
     });
 
@@ -409,7 +625,18 @@ app.delete<{ id: string }>("/columns/:id", requireAuth, async (req, res) => {
       where: {
         id: req.params.id,
         board: {
-          userId: req.userId!,
+          OR: [
+            {
+              ownerId: req.userId!,
+            },
+            {
+              members: {
+                some: {
+                  userId: req.userId!,
+                },
+              },
+            },
+          ],
         },
       },
     });
@@ -453,7 +680,18 @@ app.post<{ columnId: string }>(
         where: {
           id: req.params.columnId,
           board: {
-            userId: req.userId!,
+            OR: [
+              {
+                ownerId: req.userId!,
+              },
+              {
+                members: {
+                  some: {
+                    userId: req.userId!,
+                  },
+                },
+              },
+            ],
           },
         },
       });
@@ -510,7 +748,18 @@ app.patch<{ cardId: string }>(
           id: req.params.cardId,
           column: {
             board: {
-              userId: req.userId!,
+              OR: [
+                {
+                  ownerId: req.userId!,
+                },
+                {
+                  members: {
+                    some: {
+                      userId: req.userId!,
+                    },
+                  },
+                },
+              ],
             },
           },
         },
@@ -652,11 +901,26 @@ app.patch<{ cardId: string }>(
       const existingCard = await prisma.card.findFirst({
         where: {
           id: req.params.cardId,
-          column: {
-            board: {
-              userId: req.userId!,
+          OR: [
+            {
+              column: {
+                board: {
+                  ownerId: req.userId!,
+                },
+              },
             },
-          },
+            {
+              column: {
+                board: {
+                  members: {
+                    some: {
+                      userId: req.userId!,
+                    },
+                  },
+                },
+              },
+            },
+          ],
         },
       });
 
@@ -671,9 +935,22 @@ app.patch<{ cardId: string }>(
       const destinationColumn = await prisma.column.findFirst({
         where: {
           id: columnId,
-          board: {
-            userId: req.userId!,
-          },
+          OR: [
+            {
+              board: {
+                ownerId: req.userId!,
+              },
+            },
+            {
+              board: {
+                members: {
+                  some: {
+                    userId: req.userId!,
+                  },
+                },
+              },
+            },
+          ],
         },
       });
 
@@ -715,9 +992,22 @@ app.delete<{ cardId: string }>(
         where: {
           id: req.params.cardId,
           column: {
-            board: {
-              userId: req.userId!,
-            },
+            OR: [
+              {
+                board: {
+                  ownerId: req.userId!,
+                },
+              },
+              {
+                board: {
+                  members: {
+                    some: {
+                      userId: req.userId!,
+                    },
+                  },
+                },
+              },
+            ],
           },
         },
       });

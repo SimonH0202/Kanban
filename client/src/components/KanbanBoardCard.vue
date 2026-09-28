@@ -19,7 +19,7 @@ const emit = defineEmits<{
 
 const menuItems: ContextMenuItem[] = [
   {
-    label: 'Rename Board',
+    label: 'Edit Board',
     action: renameB,
     danger: false,
   },
