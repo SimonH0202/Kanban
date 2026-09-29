@@ -16,7 +16,7 @@ function addColumn() {
 
 <template>
   <div
-    v-if="boardStore.board"
+    v-if="boardStore.board.id !== ''"
     class="bg-linear-to-r from-green-500 to-indigo-500 dark:bg-linear-to-r dark:from-indigo-900 dark:to-rose-900 h-screen w-full flex flex-col overflow-hidden"
   >
     <div
@@ -44,5 +44,11 @@ function addColumn() {
         </div>
       </div>
     </div>
+  </div>
+  <div
+    v-else
+    class="h-screen w-full flex items-center justify-center text-gray-900 dark:text-gray-300"
+  >
+    Select a board from the left sidebar or create a new one to get started.
   </div>
 </template>

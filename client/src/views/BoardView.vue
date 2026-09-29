@@ -55,7 +55,7 @@ watch(
     <div v-else-if="error" class="text-red-500 text-lg p-6 w-full text-center" role="alert">
       {{ error }}
     </div>
-    <template v-else-if="boardData.board">
+    <template v-else>
       <KanbanBoard :data="boardData.board" />
       <KanbanCardEditor v-if="editorStore.isEditingCard" />
       <KanbanTagEditor v-if="editorStore.isEditingTags" />

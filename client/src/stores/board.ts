@@ -23,8 +23,6 @@ export const useBoardStore = defineStore('board', () => {
     board.tags = data.tags
     board.ownerId = data.ownerId
 
-    console.log('Loaded board:', board)
-
     board.columns.forEach((column) => {
       column.cards.sort((a, b) => a.position - b.position)
     })
@@ -164,6 +162,7 @@ export const useBoardStore = defineStore('board', () => {
     board.id = ''
     board.title = ''
     board.columns = []
+    board.ownerId = ''
     board.tags = []
   }
 
