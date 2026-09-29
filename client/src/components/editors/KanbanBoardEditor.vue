@@ -63,11 +63,11 @@ async function addMemberToBoard() {
 
   try {
     await boardStore.addMemberToBoard(editorStore.currentBoard.id, newMemberEmail.value)
-    newMemberEmail.value = ''
     result.value = {
       success: true,
       message: `Member with email ${newMemberEmail.value} added to the board.`,
     }
+    newMemberEmail.value = ''
   } catch (error) {
     if (error instanceof Error) {
       result.value = { success: false, message: `Failed to add member: ${error.message}` }

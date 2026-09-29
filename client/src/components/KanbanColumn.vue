@@ -46,9 +46,11 @@ function updateTitle(event: Event) {
 }
 
 async function updateColumn() {
-  await Promise.all(
-    props.data.cards.map((card, index) => boardStore.moveCard(card.id, props.data.id, index)),
-  )
+  try {
+    await boardStore.saveCardOrder()
+  } catch (error) {
+    console.error('Failed to save card order:', error)
+  }
 }
 
 function activateInput() {
@@ -96,7 +98,7 @@ function deleteColumn() {
       class="p-4 flex flex-col gap-2 overflow-y-auto"
       item-key="id"
       group="cards"
-      @change="updateColumn"
+      @end="updateColumn"
       :options="{
         animation: 200,
       }"

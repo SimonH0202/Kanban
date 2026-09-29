@@ -12,20 +12,35 @@ const editorStore = useEditorStore()
 const confirmationStore = useConfirmationStore()
 const boardStore = useBoardStore()
 
-const newTitle = ref(editorStore.currentCard?.title || '')
+const card = editorStore.currentCard
+
+const newTitle = ref(card?.title ?? '')
+const newDescription = ref(card?.description ?? '')
+const newDueDate = ref(formatDateToInputValueString(card?.dueDate))
+const newTags = ref([...(card?.tags ?? [])])
+const saveError = ref('')
 
 function closeEditor() {
   editorStore.stopEditing()
 }
 
 async function saveCard() {
-  if (editorStore.currentCard) {
-    await boardStore.updateCard(editorStore.currentCard.columnId, editorStore.currentCard.id, {
+  const card = editorStore.currentCard
+  if (!card) return
+
+  saveError.value = ''
+
+  try {
+    await boardStore.updateCard(card.columnId, card.id, {
       title: newTitle.value,
-      description: editorStore.currentCard.description,
-      dueDate: editorStore.currentCard.dueDate,
-      tags: editorStore.currentCard.tags,
+      description: newDescription.value,
+      dueDate: newDueDate.value || null,
+      tags: newTags.value,
     })
+  } catch (error) {
+    console.error('Failed to save card:', error)
+    saveError.value =
+      error instanceof Error ? error.message : 'An unknown error occurred while saving the card.'
   }
 }
 
@@ -48,18 +63,15 @@ function deleteCard() {
 async function addTag(id: string) {
   const tag = boardStore.board?.tags.find((t) => t.id === id)
 
-  if (!tag || !editorStore.currentCard) return
+  if (!tag || newTags.value.some((t) => t.id === id)) return
 
-  editorStore.currentCard.tags?.push(tag)
+  newTags.value = [...newTags.value, tag]
   await saveCard()
 }
 
 async function removeTag(tagId: string) {
-  if (editorStore.currentCard) {
-    editorStore.currentCard.tags = editorStore.currentCard.tags?.filter((t) => t.id !== tagId)
-    await saveCard()
-    console.log(editorStore.currentCard?.tags)
-  }
+  newTags.value = newTags.value.filter((tag) => tag.id !== tagId)
+  await saveCard()
 }
 </script>
 
@@ -80,7 +92,7 @@ async function removeTag(tagId: string) {
       <div class="p-8 flex flex-col gap-4 text-gray-900 dark:text-gray-300">
         <div class="flex flex-wrap gap-2">
           <KanbanTag
-            v-for="tag in editorStore.currentCard?.tags || []"
+            v-for="tag in newTags"
             :key="tag.id"
             :id="tag.id"
             :name="tag.name"

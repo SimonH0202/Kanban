@@ -9,6 +9,15 @@ import {
   canAccessBoard,
   isBoardOwner,
 } from "./authorization/boardAuthorization.js";
+import { Prisma } from "@prisma/client";
+import CardOrderError from "./helpers/cardOrderError.js";
+
+function isRecordNotFound(error: unknown): boolean {
+  return (
+    error instanceof Prisma.PrismaClientKnownRequestError &&
+    error.code === "P2025"
+  );
+}
 
 const app = express();
 
@@ -986,6 +995,9 @@ app.patch<{ cardId: string }>(
           columnId: destinationColumn.id,
           position,
         },
+        include: {
+          tags: true,
+        },
       });
 
       res.json(card);
@@ -994,6 +1006,134 @@ app.patch<{ cardId: string }>(
       res.status(500).json({
         message: "Failed to move card",
       });
+    }
+  },
+);
+
+type CardOrderColumn = {
+  columnId: string;
+  cardIds: string[];
+};
+
+app.patch<{ boardId: string }>(
+  "/boards/:boardId/card-order",
+  requireAuth,
+  async (req, res) => {
+    const { boardId } = req.params;
+    const requestedColumns = req.body.columns;
+
+    if (
+      !Array.isArray(requestedColumns) ||
+      !requestedColumns.every(
+        (column: unknown): column is CardOrderColumn =>
+          typeof column === "object" &&
+          column !== null &&
+          typeof (column as CardOrderColumn).columnId === "string" &&
+          Array.isArray((column as CardOrderColumn).cardIds) &&
+          (column as CardOrderColumn).cardIds.every(
+            (id: unknown) => typeof id === "string",
+          ),
+      )
+    ) {
+      res.status(400).json({ message: "Invalid card order" });
+      return;
+    }
+
+    try {
+      await prisma.$transaction(
+        async (tx) => {
+          // Check access inside the same transaction as the updates.
+          const board = await tx.board.findFirst({
+            where: {
+              id: boardId,
+              OR: [
+                { ownerId: req.userId! },
+                { members: { some: { userId: req.userId! } } },
+              ],
+            },
+            select: { id: true },
+          });
+
+          if (!board) {
+            throw new CardOrderError(404, "Board not found");
+          }
+
+          const databaseColumns = await tx.column.findMany({
+            where: { boardId },
+            select: {
+              id: true,
+              cards: { select: { id: true } },
+            },
+          });
+
+          const actualColumnIds = new Set(
+            databaseColumns.map((column) => column.id),
+          );
+          const submittedColumnIds = requestedColumns.map(
+            (column: CardOrderColumn) => column.columnId,
+          );
+
+          if (
+            submittedColumnIds.length !== actualColumnIds.size ||
+            new Set(submittedColumnIds).size !== actualColumnIds.size ||
+            submittedColumnIds.some((id: string) => !actualColumnIds.has(id))
+          ) {
+            throw new CardOrderError(
+              400,
+              "Order must include every column on the board exactly once",
+            );
+          }
+
+          const actualCardIds = new Set(
+            databaseColumns.flatMap((column) =>
+              column.cards.map((card) => card.id),
+            ),
+          );
+          const submittedCardIds = requestedColumns.flatMap(
+            (column: CardOrderColumn) => column.cardIds,
+          );
+
+          if (
+            submittedCardIds.length !== actualCardIds.size ||
+            new Set(submittedCardIds).size !== actualCardIds.size ||
+            submittedCardIds.some((id: string) => !actualCardIds.has(id))
+          ) {
+            throw new CardOrderError(
+              400,
+              "Order must include every card on the board exactly once",
+            );
+          }
+
+          for (const column of requestedColumns as CardOrderColumn[]) {
+            for (
+              let position = 0;
+              position < column.cardIds.length;
+              position++
+            ) {
+              await tx.card.update({
+                where: { id: column.cardIds[position] },
+                data: {
+                  columnId: column.columnId,
+                  position,
+                },
+              });
+            }
+          }
+        },
+        {
+          isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+        },
+      );
+
+      res.status(204).send();
+    } catch (error) {
+      if (error instanceof CardOrderError) {
+        res.status(error.status).json({ message: error.message });
+        return;
+      }
+
+      console.error(error);
+      res.status(500).json({ message: "Failed to save card order" });
     }
   },
 );
@@ -1190,6 +1330,13 @@ app.delete<{ boardId: string; tagId: string }>(
 
       res.status(204).send();
     } catch (error) {
+      if (isRecordNotFound(error)) {
+        res.status(404).json({
+          message: "Tag not found",
+        });
+        return;
+      }
+
       console.error(error);
       res.status(500).json({
         message: "Failed to delete tag",
@@ -1242,6 +1389,12 @@ app.patch<{ boardId: string; tagId: string }>(
 
       res.json(tag);
     } catch (error) {
+      if (isRecordNotFound(error)) {
+        res.status(404).json({
+          message: "Tag not found",
+        });
+        return;
+      }
       console.error(error);
       res.status(500).json({
         message: "Failed to update tag",

@@ -2,6 +2,7 @@ import type { Board } from '@/types/Board'
 import type { BoardMember } from '@/types/BoardMember'
 import type { Card } from '@/types/Card'
 import type { Column } from '@/types/Column'
+import type { ColumnCardOrder } from '@/types/ColumnCardOrder'
 import type { Tag } from '@/types/Tag'
 import type { User } from '@/types/User'
 
@@ -159,6 +160,14 @@ export function moveCard(cardId: string, columnId: string, position: number): Pr
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ columnId, position }),
+  })
+}
+
+export function saveCardOrder(boardId: string, columns: ColumnCardOrder[]): Promise<void> {
+  return request<void>(`/boards/${boardId}/card-order`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ columns }),
   })
 }
 

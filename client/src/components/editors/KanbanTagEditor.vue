@@ -74,7 +74,6 @@ async function saveTag() {
       <div class="flex flex-col gap-2 p-8">
         <EditedKanbanTag
           v-if="selectedTag"
-          :id="selectedTag.id"
           :name="newTagName"
           :color="newTagColor"
           />

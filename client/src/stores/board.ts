@@ -72,6 +72,8 @@ export const useBoardStore = defineStore('board', () => {
   ) {
     const savedCard = await api.updateCard(cardId, updatedCard)
 
+    if (!savedCard) return
+
     const column = board.columns.find((col) => col.id === columnId)
 
     if (!column) return
@@ -110,6 +112,29 @@ export const useBoardStore = defineStore('board', () => {
     board.tags.push(createdTag)
   }
 
+  async function saveCardOrder() {
+    const boardId = board.id
+
+    const columns = board.columns.map((column) => ({
+      columnId: column.id,
+      cardIds: column.cards.map((card) => card.id),
+    }))
+
+    try {
+      await api.saveCardOrder(boardId, columns)
+
+      board.columns.forEach((column) => {
+        column.cards.forEach((card, position) => {
+          card.columnId = column.id
+          card.position = position
+        })
+      })
+    } catch (error) {
+      await loadBoard(boardId)
+      throw error
+    }
+  }
+
   async function deleteTag(tagId: string) {
     await api.deleteTag(board.id, tagId)
 
@@ -123,12 +148,22 @@ export const useBoardStore = defineStore('board', () => {
     })
   }
 
-  async function updateTag(tagId: string, updatedTag: { name?: string; color?: string }) {
+  async function updateTag(tagId: string, updatedTag: { name: string; color: string }) {
     const savedTag = await api.updateTag(board.id, tagId, updatedTag)
     const tag = board.tags.find((t) => t.id === tagId)
     if (tag) {
       Object.assign(tag, savedTag)
     }
+
+    // Update the tag in all cards in all columns
+    board.columns.forEach((column) => {
+      column.cards.forEach((card) => {
+        const cardTag = card.tags.find((t) => t.id === tagId)
+        if (cardTag) {
+          Object.assign(cardTag, savedTag)
+        }
+      })
+    })
   }
 
   async function addColumn(column: { title: string }) {
@@ -178,6 +213,7 @@ export const useBoardStore = defineStore('board', () => {
     addCard,
     updateCard,
     moveCard,
+    saveCardOrder,
     addTag,
     deleteTag,
     updateTag,
