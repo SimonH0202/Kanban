@@ -1,11 +1,15 @@
 <script setup lang="ts">
 import { useEditorStore } from '@/stores/editor'
 import { useBoardStore } from '@/stores/board'
-import { onMounted, ref } from 'vue'
+import { useConfirmationStore } from '@/stores/confirmation'
+import { computed, onMounted, ref } from 'vue'
 import MemberTag from '../tags/MemberTag.vue'
 
 const editorStore = useEditorStore()
 const boardStore = useBoardStore()
+const confirmationStore = useConfirmationStore()
+
+const originalTitle = ref(editorStore.currentBoard?.title || '')
 
 const newTitle = ref(editorStore.currentBoard?.title || '')
 const newMemberEmail = ref('')
@@ -13,6 +17,10 @@ const newMemberEmail = ref('')
 const result = ref<{ success: boolean; message?: string } | null>(null)
 
 const members = ref<{ id: string; email: string }[]>([])
+
+const unsavedChanges = computed(() => {
+  return newTitle.value !== originalTitle.value
+})
 
 async function loadMembers(): Promise<void> {
   if (!editorStore.currentBoard) {
@@ -35,17 +43,33 @@ async function loadMembers(): Promise<void> {
 onMounted(loadMembers)
 
 function closeEditor() {
+  if (unsavedChanges.value) {
+    confirmationStore.requestConfirmation(
+      'You have unsaved changes. Are you sure you want to discard them?',
+      () => {
+        editorStore.stopEditing()
+      },
+      () => {},
+    )
+    return
+  }
   editorStore.stopEditing()
 }
 
 async function saveBoard() {
   if (!editorStore.currentBoard) return
 
-  await boardStore.updateBoard(editorStore.currentBoard.id, newTitle.value)
-
-  editorStore.currentBoard.title = newTitle.value
-
-  closeEditor()
+  try {
+    await boardStore.updateBoard(editorStore.currentBoard.id, newTitle.value)
+    editorStore.currentBoard.title = newTitle.value
+    originalTitle.value = newTitle.value
+    closeEditor()
+  } catch (error) {
+    result.value = {
+      success: false,
+      message: 'Failed to save board. Please try again.',
+    }
+  }
 }
 
 async function addMemberToBoard() {
@@ -133,7 +157,6 @@ async function removeMemberFromBoard(memberId: string) {
           v-model="newTitle"
           class="w-full rounded-sm border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-2 text-left text-gray-900 dark:text-gray-300 outline-blue-500"
           type="text"
-          @keyup.enter="saveBoard"
         />
         <div class="flex">
           <input
@@ -168,8 +191,9 @@ async function removeMemberFromBoard(memberId: string) {
           </button>
 
           <button
-            class="rounded-md bg-blue-500 px-4 py-2 font-medium text-white hover:scale-105 hover:cursor-pointer hover:bg-blue-600"
+            class="rounded-md bg-blue-500 px-4 py-2 font-medium text-white hover:scale-105 hover:cursor-pointer hover:bg-blue-600 disabled:bg-gray-400 disabled:text-gray-200 disabled:opacity-60 disabled:cursor-not-allowed"
             @click="saveBoard"
+            :disabled="!unsavedChanges"
           >
             Save Changes
           </button>

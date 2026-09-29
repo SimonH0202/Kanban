@@ -2,26 +2,44 @@
 import { useEditorStore } from '@/stores/editor'
 import EditableKanbanTag from '../tags/EditableKanbanTag.vue'
 import { useBoardStore } from '@/stores/board.ts'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import type { Tag } from '@/types/Tag.ts'
 import EditedKanbanTag from '../tags/EditedKanbanTag.vue'
+import { useConfirmationStore } from '@/stores/confirmation.ts'
 
 const editorStore = useEditorStore()
 const boardStore = useBoardStore()
+const confirmationStore = useConfirmationStore()
 
 const selectedTag = ref<Tag | null>(null)
 
 const newTagName = ref(selectedTag.value?.name || '')
 const newTagColor = ref(selectedTag.value?.color || '#000000')
 
+const unsavedChanges = computed(() => {
+  if (!selectedTag.value) return false
+  return newTagName.value !== selectedTag.value.name || newTagColor.value !== selectedTag.value.color
+})
+
 function closeEditor() {
+  if (unsavedChanges.value) {
+    confirmationStore.requestConfirmation('Discard your unsaved changes?', () => {
+      selectedTag.value = null
+      newTagName.value = ''
+      newTagColor.value = '#000000'
+      editorStore.stopEditing()
+    })
+    return
+  }
   editorStore.stopEditing()
 }
 
 async function deleteTag(tagId: string) {
   if (!boardStore.board) return
 
-  await boardStore.deleteTag(tagId)
+  confirmationStore.requestConfirmation('Are you sure you want to delete this tag?', async () => {
+    await boardStore.deleteTag(tagId)
+  })
 }
 
 function editTag(tagId: string) {
@@ -91,8 +109,9 @@ async function saveTag() {
           />
 
           <button
-            class="rounded-md bg-blue-500 px-4 py-2 font-medium text-white hover:scale-105 hover:cursor-pointer hover:bg-blue-600"
+            class="rounded-md bg-blue-500 px-4 py-2 font-medium text-white hover:scale-105 hover:cursor-pointer hover:bg-blue-600 enabled:hover:scale-105 enabled:hover:cursor-pointer disabled:bg-gray-400 disabled:text-gray-200 disabled:opacity-60 disabled:cursor-not-allowed"
             @click="saveTag"
+            :disabled="!unsavedChanges"
           >
             Save Changes
           </button>

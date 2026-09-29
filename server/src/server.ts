@@ -1020,7 +1020,7 @@ app.patch<{ boardId: string }>(
   requireAuth,
   async (req, res) => {
     const { boardId } = req.params;
-    const requestedColumns = req.body.columns;
+    const requestedColumns = req.body?.columns;
 
     if (
       !Array.isArray(requestedColumns) ||
