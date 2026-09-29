@@ -6,6 +6,7 @@ import { computed, ref } from 'vue'
 import type { Tag } from '@/types/Tag.ts'
 import EditedKanbanTag from '../tags/EditedKanbanTag.vue'
 import { useConfirmationStore } from '@/stores/confirmation.ts'
+import SaveButton from '../buttons/SaveButton.vue'
 
 const editorStore = useEditorStore()
 const boardStore = useBoardStore()
@@ -37,6 +38,12 @@ function closeEditor() {
 async function deleteTag(tagId: string) {
   if (!boardStore.board) return
 
+  if (selectedTag.value && selectedTag.value.id === tagId) {
+    selectedTag.value = null
+    newTagName.value = ''
+    newTagColor.value = '#000000'
+  }
+
   confirmationStore.requestConfirmation('Are you sure you want to delete this tag?', async () => {
     await boardStore.deleteTag(tagId)
   })
@@ -67,8 +74,9 @@ async function saveTag() {
     <button class="fixed inset-0 backdrop-blur-sm" @click="closeEditor"></button>
     <div class="z-50 bg-white dark:bg-gray-800 rounded-sm shadow-lg w-200 flex flex-col gap-4">
       <div
-        class="text-gray-900 flex justify-end items-center p-4 border-b border-gray-300 dark:border-gray-700"
+        class="flex justify-between items-center p-4 border-b border-gray-300 dark:border-gray-700 text-gray-900 dark:text-gray-300"
       >
+        <h1 class="text-lg font-bold">Tag Editor</h1>
         <button
           class="text-lg font-bold hover:scale-105 hover:cursor-pointer dark:text-gray-300"
           @click="closeEditor"
@@ -99,6 +107,7 @@ async function saveTag() {
           <input
             id="new-tag-name"
             v-model="newTagName"
+            :disabled="!selectedTag"
             class="grow rounded-sm border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-2 text-left text-gray-900 dark:text-gray-300 outline-blue-500"
           >
           </input>
@@ -106,15 +115,10 @@ async function saveTag() {
             type="color"
             class="h-full aspect-square px-0.5 rounded-sm border border-gray-200 bg-white dark:bg-gray-800 dark:border-gray-700 text-left text-gray-900 outline-blue-500 hover:cursor-pointer"
             v-model="newTagColor"
+            :disabled="!selectedTag"
           />
 
-          <button
-            class="rounded-md bg-blue-500 px-4 py-2 font-medium text-white hover:scale-105 hover:cursor-pointer hover:bg-blue-600 enabled:hover:scale-105 enabled:hover:cursor-pointer disabled:bg-gray-400 disabled:text-gray-200 disabled:opacity-60 disabled:cursor-not-allowed"
-            @click="saveTag"
-            :disabled="!unsavedChanges"
-          >
-            Save Changes
-          </button>
+          <SaveButton :unsavedChanges="unsavedChanges" @save="saveTag" />
         </div>
       </div>
     </div>

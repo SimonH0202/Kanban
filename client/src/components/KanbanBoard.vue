@@ -2,7 +2,7 @@
 import { useBoardStore } from '@/stores/board.ts'
 import KanbanColumn from './KanbanColumn.vue'
 import { provide } from 'vue'
-import TagEditorButton from './TagEditorButton.vue'
+import TagEditorButton from '../components/buttons/TagEditorButton.vue'
 
 const boardStore = useBoardStore()
 

@@ -8,6 +8,7 @@ import type { Tag } from '@/types/Tag'
 import trashIcon from '@/assets/icons/trash.png'
 import KanbanTag from '../tags/KanbanTag.vue'
 import TagSelector from '../overlays/TagSelector.vue'
+import SaveButton from '../buttons/SaveButton.vue'
 
 const editorStore = useEditorStore()
 const confirmationStore = useConfirmationStore()
@@ -114,7 +115,10 @@ function removeTag(id: string) {
     ></button>
 
     <div class="z-50 w-200 rounded-sm bg-white dark:bg-gray-800 shadow-lg">
-      <div class="flex justify-end items-center p-4 border-b border-gray-300 dark:border-gray-700">
+      <div
+        class="flex justify-between items-center p-4 border-b border-gray-300 dark:border-gray-700"
+      >
+        <h1 class="text-lg font-bold">Card Editor</h1>
         <button
           class="text-lg font-bold text-gray-900 dark:text-gray-300 hover:cursor-pointer"
           aria-label="Close card editor"
@@ -186,14 +190,7 @@ function removeTag(id: string) {
           >
             Cancel
           </button>
-
-          <button
-            class="rounded-md bg-blue-500 px-4 py-2 font-medium text-white hover:bg-blue-600 enabled:hover:scale-105 enabled:hover:cursor-pointer disabled:bg-gray-400 disabled:text-gray-200 disabled:opacity-60 disabled:cursor-not-allowed"
-            :disabled="!unsavedChanges || isSaving"
-            @click="saveCard"
-          >
-            {{ isSaving ? 'Saving…' : 'Save Changes' }}
-          </button>
+          <SaveButton :unsavedChanges="unsavedChanges || isSaving" @save="saveCard" />
         </div>
       </div>
     </div>

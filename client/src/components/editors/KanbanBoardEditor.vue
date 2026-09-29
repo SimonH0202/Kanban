@@ -4,6 +4,7 @@ import { useBoardStore } from '@/stores/board'
 import { useConfirmationStore } from '@/stores/confirmation'
 import { computed, onMounted, ref } from 'vue'
 import MemberTag from '../tags/MemberTag.vue'
+import SaveButton from '../buttons/SaveButton.vue'
 
 const editorStore = useEditorStore()
 const boardStore = useBoardStore()
@@ -136,8 +137,9 @@ async function removeMemberFromBoard(memberId: string) {
 
     <div class="z-50 w-200 rounded-sm bg-white dark:bg-gray-800 shadow-lg">
       <div
-        class="flex items-center justify-end border-b border-gray-300 dark:border-gray-700 p-4 text-gray-900 dark:text-gray-300"
+        class="flex items-center justify-between border-b border-gray-300 dark:border-gray-700 p-4 text-gray-900 dark:text-gray-300"
       >
+        <h1 class="text-lg font-bold">Board Editor</h1>
         <button class="text-lg font-bold hover:scale-105 hover:cursor-pointer" @click="closeEditor">
           ✕
         </button>
@@ -190,13 +192,7 @@ async function removeMemberFromBoard(memberId: string) {
             Cancel
           </button>
 
-          <button
-            class="rounded-md bg-blue-500 px-4 py-2 font-medium text-white hover:scale-105 hover:cursor-pointer hover:bg-blue-600 disabled:bg-gray-400 disabled:text-gray-200 disabled:opacity-60 disabled:cursor-not-allowed"
-            @click="saveBoard"
-            :disabled="!unsavedChanges"
-          >
-            Save Changes
-          </button>
+          <SaveButton :unsavedChanges="unsavedChanges" @save="saveBoard" />
         </div>
       </div>
     </div>

@@ -32,14 +32,14 @@ function setTextColorBasedOnBackground(bgColor: string): string {
     :style="{ backgroundColor: color, color: setTextColorBasedOnBackground(color) }"
   >
     <button
-      class="py-1 h-sm w-fit text-center flex items-center justify-center gap-1 hover:cursor-pointer hover:scale-105 transition-transform duration-200"
+      class="py-1 h-sm w-fit text-center flex items-center justify-center gap-1 hover:cursor-pointer"
       :style="{ color: setTextColorBasedOnBackground(color) }"
       @click="$emit('editTag', id)"
     >
       {{ name }}
     </button>
     <button
-      class="hover:cursor-pointer py-0.5 text-xs font-bold text-gray-900 dark:text-gray-300 hover:scale-110 transition-colors duration-200 text-center"
+      class="hover:cursor-pointer py-0.5 text-xs font-bold text-gray-900 dark:text-gray-300 text-center"
       :style="{ color: setTextColorBasedOnBackground(color) }"
       @click="$emit('deleteTag', id)"
     >
