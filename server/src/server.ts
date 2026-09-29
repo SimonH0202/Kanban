@@ -167,6 +167,12 @@ app.get("/boards", requireAuth, async (req, res) => {
         id: true,
         title: true,
         ownerId: true,
+        owner: {
+          select: {
+            id: true,
+            email: true,
+          },
+        },
       },
     });
 
@@ -235,6 +241,12 @@ app.get<{ id: string }>("/boards/:id", requireAuth, async (req, res) => {
                 tags: true,
               },
             },
+          },
+        },
+        owner: {
+          select: {
+            id: true,
+            email: true,
           },
         },
         tags: true,

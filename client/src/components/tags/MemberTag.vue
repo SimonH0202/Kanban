@@ -2,6 +2,7 @@
 defineProps<{
   id: string
   email: string
+  showDeleteButton: boolean
 }>()
 
 defineEmits<{
@@ -16,6 +17,7 @@ defineEmits<{
     >
       {{ email }}
       <button
+        v-if="showDeleteButton"
         class="hover:cursor-pointer px-1 py-0.5 text-xs font-bold"
         @click="$emit('removeMember', id)"
       >

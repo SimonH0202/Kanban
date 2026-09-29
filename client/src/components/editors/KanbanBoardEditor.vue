@@ -5,10 +5,12 @@ import { useConfirmationStore } from '@/stores/confirmation'
 import { computed, onMounted, ref } from 'vue'
 import MemberTag from '../tags/MemberTag.vue'
 import SaveButton from '../buttons/SaveButton.vue'
+import { useAuthStore } from '@/stores/auth.ts'
 
 const editorStore = useEditorStore()
 const boardStore = useBoardStore()
 const confirmationStore = useConfirmationStore()
+const authStore = useAuthStore()
 
 const originalTitle = ref(editorStore.currentBoard?.title || '')
 
@@ -21,6 +23,12 @@ const members = ref<{ id: string; email: string }[]>([])
 
 const unsavedChanges = computed(() => {
   return newTitle.value !== originalTitle.value
+})
+
+const isOwner = computed(() => {
+  if (!editorStore.currentBoard) return false
+
+  return authStore.checkIsOwner(editorStore.currentBoard?.ownerId)
 })
 
 async function loadMembers(): Promise<void> {
@@ -139,21 +147,28 @@ async function removeMemberFromBoard(memberId: string) {
       <div
         class="flex items-center justify-between border-b border-gray-300 dark:border-gray-700 p-4 text-gray-900 dark:text-gray-300"
       >
-        <h1 class="text-lg font-bold">Board Editor</h1>
+        <h1 v-if="isOwner" class="text-lg font-bold">Board Editor</h1>
+        <h1 v-else class="text-lg font-bold">Board Members</h1>
         <button class="text-lg font-bold hover:scale-105 hover:cursor-pointer" @click="closeEditor">
           ✕
         </button>
       </div>
       <div class="flex flex-wrap gap-2 p-8">
         <MemberTag
+          :id="editorStore.currentBoard?.ownerId || ''"
+          :email="editorStore.currentBoard?.owner?.email || ''"
+          :showDeleteButton="false"
+        />
+        <MemberTag
           v-for="member in members"
           :key="member.id"
           :id="member.id"
           :email="member.email"
+          :showDeleteButton="isOwner"
           @remove-member="removeMemberFromBoard"
         />
       </div>
-      <div class="flex flex-col gap-4 p-8 text-gray-900 dark:text-gray-300">
+      <div v-if="isOwner" class="flex flex-col gap-4 p-8 text-gray-900 dark:text-gray-300">
         <input
           id="board-title"
           v-model="newTitle"
@@ -184,7 +199,7 @@ async function removeMemberFromBoard(memberId: string) {
           >{{ result?.message }}
         </span>
 
-        <div class="mt-4 flex justify-end gap-2">
+        <div v-if="isOwner" class="mt-4 flex justify-end gap-2">
           <button
             class="rounded-md bg-gray-200 dark:bg-gray-600 px-4 py-2 font-medium text-gray-800 dark:text-gray-300 hover:scale-105 hover:cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-500"
             @click="closeEditor"

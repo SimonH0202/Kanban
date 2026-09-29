@@ -8,4 +8,8 @@ export type BoardListItem = {
   id: string
   title: string
   ownerId: string
+  owner: {
+    id: string
+    email: string
+  }
 }

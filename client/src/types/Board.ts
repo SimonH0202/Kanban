@@ -7,4 +7,8 @@ export type Board = {
   columns: Column[]
   tags: Tag[]
   ownerId: string
+  owner: {
+    id: string
+    email: string
+  }
 }

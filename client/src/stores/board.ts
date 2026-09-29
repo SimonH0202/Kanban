@@ -12,6 +12,7 @@ export const useBoardStore = defineStore('board', () => {
     columns: [],
     tags: [],
     ownerId: '',
+    owner: { id: '', email: '' },
   })
 
   async function loadBoard(boardId: string) {
@@ -22,6 +23,7 @@ export const useBoardStore = defineStore('board', () => {
     board.columns = data.columns
     board.tags = data.tags
     board.ownerId = data.ownerId
+    board.owner = data.owner
 
     board.columns.forEach((column) => {
       column.cards.sort((a, b) => a.position - b.position)
@@ -198,6 +200,7 @@ export const useBoardStore = defineStore('board', () => {
     board.title = ''
     board.columns = []
     board.ownerId = ''
+    board.owner = { id: '', email: '' }
     board.tags = []
   }
 

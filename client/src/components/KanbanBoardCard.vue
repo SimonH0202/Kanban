@@ -39,9 +39,7 @@ const ownerMenuItems: ContextMenuItem[] = [
 const nonOwnerMenuItems: ContextMenuItem[] = [
   {
     label: 'View Members',
-    action: () => {
-      // Implement view members functionality here
-    },
+    action: editB,
     danger: false,
   },
 ]
