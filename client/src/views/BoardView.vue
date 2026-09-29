@@ -13,6 +13,7 @@ const cardEditorStore = useCardEditorStore()
 const route = useRoute()
 
 const isLoading = ref(false)
+const showLoading = ref(false)
 const error = ref('')
 
 watch(
@@ -20,14 +21,25 @@ watch(
   async (boardId) => {
     if (typeof boardId !== 'string') return
 
-    isLoading.value = true
-    error.value = ''
+    let loadingTimer: ReturnType<typeof setTimeout> | undefined
 
     try {
+      loadingTimer = setTimeout(() => {
+        showLoading.value = true
+      }, 300)
+
+      isLoading.value = true
+      error.value = ''
+
       await boardData.loadBoard(boardId)
     } catch (err) {
       error.value = 'Failed to load board'
     } finally {
+      if (loadingTimer) {
+        clearTimeout(loadingTimer)
+      }
+
+      showLoading.value = false
       isLoading.value = false
     }
   },
@@ -38,7 +50,7 @@ watch(
 <template>
   <div class="flex flex-row">
     <KanbanBoardList />
-    <div v-if="isLoading" class="p-6 w-full text-center text-lg">Loading...</div>
+    <div v-if="showLoading" class="p-6 w-full text-center text-lg">Loading...</div>
     <div v-else-if="error" class="text-red-500 text-lg p-6 w-full text-center" role="alert">
       {{ error }}
     </div>

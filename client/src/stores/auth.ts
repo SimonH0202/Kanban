@@ -39,6 +39,10 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  function checkIsOwner(OwnerId: string): boolean {
+    return user.value?.id === OwnerId
+  }
+
   return {
     user,
     isLoading,
@@ -47,5 +51,6 @@ export const useAuthStore = defineStore('auth', () => {
     login,
     logout,
     checkAuth,
+    checkIsOwner,
   }
 })

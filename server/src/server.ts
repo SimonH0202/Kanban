@@ -157,6 +157,7 @@ app.get("/boards", requireAuth, async (req, res) => {
       select: {
         id: true,
         title: true,
+        ownerId: true,
       },
     });
 
@@ -417,7 +418,7 @@ app.get<{ boardId: string }>(
   requireAuth,
   async (req, res) => {
     try {
-      const hasAccess = canAccessBoard(req.userId!, req.params.boardId);
+      const hasAccess = await canAccessBoard(req.userId!, req.params.boardId);
 
       if (!hasAccess) {
         res.status(403).json({ message: "Access denied" });
@@ -922,6 +923,13 @@ app.patch<{ cardId: string }>(
             },
           ],
         },
+        include: {
+          column: {
+            select: {
+              boardId: true,
+            },
+          },
+        },
       });
 
       if (!existingCard) {
@@ -931,7 +939,6 @@ app.patch<{ cardId: string }>(
         return;
       }
 
-      // Check ownership of the destination column
       const destinationColumn = await prisma.column.findFirst({
         where: {
           id: columnId,
@@ -954,9 +961,19 @@ app.patch<{ cardId: string }>(
         },
       });
 
+      // Check ownership of the destination column
       if (!destinationColumn) {
         res.status(404).json({
           message: "Destination column not found",
+        });
+        return;
+      }
+
+      // Check if the destination column exists and belongs to the same board as the card
+      if (existingCard.column.boardId !== destinationColumn.boardId) {
+        res.status(400).json({
+          message:
+            "Destination column must belong to the same board as the card",
         });
         return;
       }
@@ -1043,11 +1060,22 @@ app.post<{ boardId: string }>(
     try {
       const { name, color } = req.body;
 
-      // Make sure the board belongs to the logged-in user
+      // Make sure the user has access to the board
       const board = await prisma.board.findFirst({
         where: {
           id: req.params.boardId,
-          userId: req.userId!,
+          OR: [
+            {
+              ownerId: req.userId!,
+            },
+            {
+              members: {
+                some: {
+                  userId: req.userId!,
+                },
+              },
+            },
+          ],
         },
       });
 
@@ -1096,11 +1124,22 @@ app.get<{ boardId: string }>(
   requireAuth,
   async (req, res) => {
     try {
-      // Make sure the board belongs to the logged-in user
+      // Make sure the user has access to the board
       const board = await prisma.board.findFirst({
         where: {
           id: req.params.boardId,
-          userId: req.userId!,
+          OR: [
+            {
+              ownerId: req.userId!,
+            },
+            {
+              members: {
+                some: {
+                  userId: req.userId!,
+                },
+              },
+            },
+          ],
         },
       });
 
@@ -1122,6 +1161,38 @@ app.get<{ boardId: string }>(
       console.error(error);
       res.status(500).json({
         message: "Failed to get tags",
+      });
+    }
+  },
+);
+
+// Delete a tag from a board
+app.delete<{ boardId: string; tagId: string }>(
+  "/boards/:boardId/tags/:tagId",
+  requireAuth,
+  async (req, res) => {
+    try {
+      // Make sure the user has access to the board
+      const hasAccess = await canAccessBoard(req.userId!, req.params.boardId);
+      if (!hasAccess) {
+        res.status(403).json({
+          message: "You do not have permission to delete this tag",
+        });
+        return;
+      }
+
+      await prisma.tag.delete({
+        where: {
+          id: req.params.tagId,
+          boardId: req.params.boardId,
+        },
+      });
+
+      res.status(204).send();
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({
+        message: "Failed to delete tag",
       });
     }
   },

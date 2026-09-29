@@ -76,9 +76,9 @@ function selectItem(item: ContextMenuItem) {
       <button
         v-for="item in items"
         :key="item.label"
-        class="w-full p-2 text-left text-gray-900 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-sm"
+        class="w-full p-2 text-left text-gray-900 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-sm hover:cursor-pointer"
         :class="{
-          'text-red-500 hover:bg-red-100 rounded-sm': item.danger,
+          'text-red-500 dark:text-red-500': item.danger,
         }"
         @click="selectItem(item)"
       >

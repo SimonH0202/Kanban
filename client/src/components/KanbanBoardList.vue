@@ -17,6 +17,7 @@ const boardStore = useBoardStore()
 
 const boards = ref<BoardListItem[]>([])
 const isLoading = ref(false)
+const showLoading = ref(false)
 const error = ref('')
 
 async function loadBoards() {
@@ -34,29 +35,57 @@ async function loadBoards() {
 }
 
 async function addBoard() {
-  const board = await createBoard('New Board')
+  let loadingTimer: ReturnType<typeof setTimeout> | undefined
 
-  router.push({
-    name: 'board',
-    params: {
-      boardId: board.id,
-    },
-  })
+  try {
+    isLoading.value = true
+    error.value = ''
 
-  loadBoards()
+    loadingTimer = setTimeout(() => {
+      showLoading.value = true
+    }, 300)
+
+    const board = await createBoard('New Board')
+
+    await loadBoards()
+
+    router.push({
+      name: 'board',
+      params: {
+        boardId: board.id,
+      },
+    })
+  } catch (err) {
+    error.value = 'Failed to create board'
+    console.error(err)
+  } finally {
+    if (loadingTimer) {
+      clearTimeout(loadingTimer)
+    }
+
+    isLoading.value = false
+    showLoading.value = false
+  }
 }
 
-function deleteBoard(boardId: string) {
-  boards.value = boards.value.filter((board) => board.id !== boardId)
+async function deleteBoard(boardId: string) {
+  try {
+    error.value = ''
 
-  const currentBoardId = boardStore.board?.id
-  if (currentBoardId === boardId) {
-    router.push('/')
+    const isCurrentBoard = boardStore.board?.id === boardId
+
+    await boardStore.deleteBoard(boardId)
+
+    boards.value = boards.value.filter((board) => board.id !== boardId)
+
+    if (isCurrentBoard) {
+      await router.push('/')
+    }
+  } catch (err) {
+    error.value = err instanceof Error ? err.message : 'Failed to delete board'
+
+    console.error(err)
   }
-
-  boardStore.deleteBoard(boardId)
-
-  loadBoards()
 }
 
 async function logout() {
@@ -87,9 +116,8 @@ onMounted(() => {
       </button>
     </div>
 
-    <p v-if="isLoading">Loading boards...</p>
+    <p v-if="showLoading">Loading boards...</p>
     <p v-else-if="error">{{ error }}</p>
-
     <div v-else class="flex flex-col gap-2 w-full">
       <KanbanBoardCard
         v-for="board in boards"

@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import type { BoardListItem, ContextMenuItem } from '@/types/Items'
-import { deleteBoard } from '@/api/api.ts'
 import { useBoardEditorStore } from '@/stores/boardEditor.ts'
 import { useConfirmationStore } from '@/stores/confirmation.ts'
-import dotsIconBlack from '@/assets/icons/dots-black.png'
 import ContextMenu from '../components/overlays/ContextMenu.vue'
+import { useAuthStore } from '@/stores/auth.ts'
+
 const boardEditorStore = useBoardEditorStore()
 const confirmationStore = useConfirmationStore()
+const authStore = useAuthStore()
 
 const props = defineProps<{
   board: BoardListItem
@@ -17,7 +18,7 @@ const emit = defineEmits<{
   (e: 'rename', boardId: string): void
 }>()
 
-const menuItems: ContextMenuItem[] = [
+const ownerMenuItems: ContextMenuItem[] = [
   {
     label: 'Edit Board',
     action: renameB,
@@ -32,6 +33,16 @@ const menuItems: ContextMenuItem[] = [
       () => {},
     ),
     danger: true,
+  },
+]
+
+const nonOwnerMenuItems: ContextMenuItem[] = [
+  {
+    label: 'View Members',
+    action: () => {
+      // Implement view members functionality here
+    },
+    danger: false,
   },
 ]
 
@@ -51,6 +62,11 @@ function renameB() {
     <RouterLink class="p-4 h-8 w-full flex items-center" :to="`/boards/${board.id}`">
       {{ board.title }}
     </RouterLink>
-    <ContextMenu :items="menuItems" :dotColor="'gray-900'" />
+    <ContextMenu
+      v-if="authStore.checkIsOwner(board.ownerId)"
+      :items="ownerMenuItems"
+      :dotColor="'gray-900'"
+    />
+    <ContextMenu v-else :items="nonOwnerMenuItems" :dotColor="'gray-900'" />
   </div>
 </template>
