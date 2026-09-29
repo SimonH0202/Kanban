@@ -13,26 +13,22 @@ const error = ref('')
 const isLoading = ref(false)
 
 async function submit() {
+  if (isLoading.value) return
+
   error.value = ''
-  isLoading.value = true
 
   if (password.value !== confirmPassword.value) {
     error.value = 'Passwords do not match'
-    isLoading.value = false
     return
   }
 
-  try {
-    const user = await register(email.value, password.value)
+  isLoading.value = true
 
-    await router.push({
-      name: 'login',
-      query: { registered: '1' },
-    })
-    console.log('Registered User:', user)
-  } catch (err: any) {
-    error.value = err.message || 'An error occurred during registration'
-  } finally {
+  try {
+    await register(email.value, password.value)
+    await router.push({ name: 'login', query: { registered: '1' } })
+  } catch (err) {
+    error.value = err instanceof Error ? err.message : 'Registration failed'
     isLoading.value = false
   }
 }
@@ -87,16 +83,17 @@ async function submit() {
         />
       </div>
 
-      <p v-if="error" class="text-sm text-red-600">
+      <p v-if="error" class="text-sm text-red-600 h-5 w-full">
         {{ error }}
       </p>
+      <p v-else class=" h-5 w-full"></p>
 
       <button
         type="submit"
         :disabled="isLoading"
         class="rounded-sm bg-blue-600 p-2 text-white disabled:opacity-50 hover:scale-101 hover:cursor-pointer"
       >
-        {{ isLoading ? 'Creating account...' : 'Create Account' }}
+        Create Account
       </button>
       <p class="text-sm text-gray-500">
         Already have an account?

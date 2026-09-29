@@ -19,6 +19,16 @@ function isRecordNotFound(error: unknown): boolean {
   );
 }
 
+function validatePassword(password: unknown): string | null {
+  if (typeof password !== "string") return "Password is required";
+  if ([...password].length < 15)
+    return "Password must be at least 15 characters";
+  if (Buffer.byteLength(password, "utf8") > 72) {
+    return "Password is too long for the current password hashing setup";
+  }
+  return null;
+}
+
 const app = express();
 
 app.use(
@@ -58,6 +68,13 @@ app.post("/auth/register", async (req, res) => {
 
   if (!email || !password) {
     res.status(400).json({ message: "Email and password are required" });
+    return;
+  }
+
+  const passwordError = validatePassword(password);
+
+  if (passwordError) {
+    res.status(400).json({ message: passwordError });
     return;
   }
 

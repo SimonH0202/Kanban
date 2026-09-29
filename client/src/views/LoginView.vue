@@ -76,9 +76,10 @@ async function submit() {
         Account created successfully! Please log in.
       </p>
 
-      <p v-if="error" class="text-sm text-red-600">
+      <p v-if="error" class="text-sm text-red-600 h-5 w-full">
         {{ error }}
       </p>
+      <p v-else class="h-5 w-full"></p>
 
       <button
         type="submit"
