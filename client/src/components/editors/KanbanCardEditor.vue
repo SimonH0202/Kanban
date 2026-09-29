@@ -5,18 +5,26 @@ import { useEditorStore } from '@/stores/editor'
 import { useConfirmationStore } from '@/stores/confirmation'
 import { formatDateToInputValueString } from '@/util/util'
 import type { Tag } from '@/types/Tag'
-import trashIcon from '@/assets/icons/trash.png'
 import KanbanTag from '../tags/KanbanTag.vue'
 import TagSelector from '../overlays/TagSelector.vue'
 import SaveButton from '../buttons/SaveButton.vue'
+import ContextMenu from '../overlays/ContextMenu.vue'
+import type { ContextMenuItem } from '@/types/Items.ts'
 
 const editorStore = useEditorStore()
 const confirmationStore = useConfirmationStore()
 const boardStore = useBoardStore()
 
+const menuItems: ContextMenuItem[] = [
+  {
+    label: 'Delete Card',
+    action: deleteCard,
+    danger: true,
+  },
+]
+
 const card = editorStore.currentCard
 
-// Snapshot of the values when the editor opened.
 const original = {
   title: card?.title ?? '',
   description: card?.description ?? '',
@@ -24,7 +32,6 @@ const original = {
   tagIds: (card?.tags ?? []).map((tag) => tag.id).sort(),
 }
 
-// Editable drafts. These do not change the saved card.
 const newTitle = ref(original.title)
 const newDescription = ref(original.description)
 const newDueDate = ref(original.dueDate)
@@ -119,13 +126,16 @@ function removeTag(id: string) {
         class="flex justify-between items-center p-4 border-b border-gray-300 dark:border-gray-700"
       >
         <h1 class="text-lg font-bold">Card Editor</h1>
-        <button
-          class="text-lg font-bold text-gray-900 dark:text-gray-300 hover:cursor-pointer"
-          aria-label="Close card editor"
-          @click="closeEditor"
-        >
-          ✕
-        </button>
+        <div class="flex items-center gap-2">
+          <ContextMenu :items="menuItems" />
+          <button
+            class="text-lg font-bold text-gray-900 dark:text-gray-300 hover:cursor-pointer"
+            aria-label="Close card editor"
+            @click="closeEditor"
+          >
+            ✕
+          </button>
+        </div>
       </div>
 
       <div class="p-8 flex flex-col gap-4 text-gray-900 dark:text-gray-300">
@@ -141,17 +151,6 @@ function removeTag(id: string) {
 
           <TagSelector :current-tags="newTags" @select-tag="addTag" />
         </div>
-
-        <div class="w-full flex justify-end">
-          <button
-            class="h-fit w-fit hover:cursor-pointer hover:scale-105"
-            aria-label="Delete card"
-            @click="deleteCard"
-          >
-            <img :src="trashIcon" alt="" class="w-5 h-5" />
-          </button>
-        </div>
-
         <input
           id="card-title"
           v-model="newTitle"
