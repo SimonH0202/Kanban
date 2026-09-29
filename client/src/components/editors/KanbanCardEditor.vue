@@ -1,40 +1,36 @@
 <script setup lang="ts">
 import { useBoardStore } from '@/stores/board'
-import { useCardEditorStore } from '@/stores/cardEditor'
+import { useEditorStore } from '@/stores/editor'
 import { useConfirmationStore } from '@/stores/confirmation'
 import { formatDateToInputValueString } from '@/util/util'
 import { ref } from 'vue'
 import trashIcon from '@/assets/icons/trash.png'
-import KanbanTag from './KanbanTag.vue'
-import TagSelector from '../components/overlays/TagSelector.vue'
+import KanbanTag from '../tags/KanbanTag.vue'
+import TagSelector from '../overlays/TagSelector.vue'
 
-const cardEditorStore = useCardEditorStore()
+const editorStore = useEditorStore()
 const confirmationStore = useConfirmationStore()
 const boardStore = useBoardStore()
 
-const newTitle = ref(cardEditorStore.currentCard?.title || '')
+const newTitle = ref(editorStore.currentCard?.title || '')
 
 function closeEditor() {
-  cardEditorStore.stopEditing()
+  editorStore.stopEditing()
 }
 
 async function saveCard() {
-  if (cardEditorStore.currentCard) {
-    await boardStore.updateCard(
-      cardEditorStore.currentCard.columnId,
-      cardEditorStore.currentCard.id,
-      {
-        title: newTitle.value,
-        description: cardEditorStore.currentCard.description,
-        dueDate: cardEditorStore.currentCard.dueDate,
-        tags: cardEditorStore.currentCard.tags,
-      },
-    )
+  if (editorStore.currentCard) {
+    await boardStore.updateCard(editorStore.currentCard.columnId, editorStore.currentCard.id, {
+      title: newTitle.value,
+      description: editorStore.currentCard.description,
+      dueDate: editorStore.currentCard.dueDate,
+      tags: editorStore.currentCard.tags,
+    })
   }
 }
 
 function deleteCard() {
-  const card = cardEditorStore.currentCard
+  const card = editorStore.currentCard
   if (!card) return
 
   const { columnId, id } = card
@@ -52,19 +48,17 @@ function deleteCard() {
 async function addTag(id: string) {
   const tag = boardStore.board?.tags.find((t) => t.id === id)
 
-  if (!tag || !cardEditorStore.currentCard) return
+  if (!tag || !editorStore.currentCard) return
 
-  cardEditorStore.currentCard.tags?.push(tag)
+  editorStore.currentCard.tags?.push(tag)
   await saveCard()
 }
 
 async function removeTag(tagId: string) {
-  if (cardEditorStore.currentCard) {
-    cardEditorStore.currentCard.tags = cardEditorStore.currentCard.tags?.filter(
-      (t) => t.id !== tagId,
-    )
+  if (editorStore.currentCard) {
+    editorStore.currentCard.tags = editorStore.currentCard.tags?.filter((t) => t.id !== tagId)
     await saveCard()
-    console.log(cardEditorStore.currentCard?.tags)
+    console.log(editorStore.currentCard?.tags)
   }
 }
 </script>
@@ -86,17 +80,14 @@ async function removeTag(tagId: string) {
       <div class="p-8 flex flex-col gap-4 text-gray-900 dark:text-gray-300">
         <div class="flex flex-wrap gap-2">
           <KanbanTag
-            v-for="tag in cardEditorStore.currentCard?.tags || []"
+            v-for="tag in editorStore.currentCard?.tags || []"
             :key="tag.id"
             :id="tag.id"
             :name="tag.name"
             :color="tag.color"
             @remove-tag="(tagId: string) => removeTag(tagId)"
           />
-          <TagSelector
-            :currentTags="cardEditorStore.currentCard?.tags || []"
-            @select-tag="addTag"
-          />
+          <TagSelector :currentTags="editorStore.currentCard?.tags || []" @select-tag="addTag" />
         </div>
         <div class="w-full h-fit flex justify-end">
           <button class="h-fit w-fit hover:cursor-pointer hover:scale-105" @click="deleteCard">
@@ -115,11 +106,11 @@ async function removeTag(tagId: string) {
           id="card-due-date"
           type="date"
           class="w-32 bg-gray-200 dark:bg-indigo-900 dark:text-gray-300 rounded-md py-1 px-2 hover:cursor-pointer"
-          :value="formatDateToInputValueString(cardEditorStore.currentCard?.dueDate)"
+          :value="formatDateToInputValueString(editorStore.currentCard?.dueDate)"
           @input="
             (e) => {
-              if (cardEditorStore.currentCard) {
-                cardEditorStore.currentCard.dueDate = (e.target as HTMLInputElement).value
+              if (editorStore.currentCard) {
+                editorStore.currentCard.dueDate = (e.target as HTMLInputElement).value
                   ? new Date((e.target as HTMLInputElement).value)
                   : null
               }
@@ -133,11 +124,11 @@ async function removeTag(tagId: string) {
         <textarea
           id="card-description"
           class="w-full min-h-60 p-2 text-left bg-white dark:bg-gray-800 dark:text-gray-300 text-gray-900 text-md rounded-sm border border-gray-200 dark:border-gray-700 outline-blue-500"
-          :value="cardEditorStore.currentCard?.description"
+          :value="editorStore.currentCard?.description"
           @input="
             (e) => {
-              if (cardEditorStore.currentCard) {
-                cardEditorStore.currentCard.description = (e.target as HTMLTextAreaElement).value
+              if (editorStore.currentCard) {
+                editorStore.currentCard.description = (e.target as HTMLTextAreaElement).value
               }
             }
           "

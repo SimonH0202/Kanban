@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import type { BoardListItem, ContextMenuItem } from '@/types/Items'
-import { useBoardEditorStore } from '@/stores/boardEditor.ts'
 import { useConfirmationStore } from '@/stores/confirmation.ts'
 import ContextMenu from '../components/overlays/ContextMenu.vue'
 import { useAuthStore } from '@/stores/auth.ts'
+import { useEditorStore } from '@/stores/editor.ts'
 
-const boardEditorStore = useBoardEditorStore()
+const boardEditorStore = useEditorStore()
 const confirmationStore = useConfirmationStore()
 const authStore = useAuthStore()
 
@@ -15,13 +15,13 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'delete', boardId: string): void
-  (e: 'rename', boardId: string): void
+  (e: 'edit', boardId: string): void
 }>()
 
 const ownerMenuItems: ContextMenuItem[] = [
   {
     label: 'Edit Board',
-    action: renameB,
+    action: editB,
     danger: false,
   },
   {
@@ -50,8 +50,8 @@ function deleteB() {
   emit('delete', props.board.id)
 }
 
-function renameB() {
-  boardEditorStore.startEditing(props.board)
+function editB() {
+  boardEditorStore.startEditingBoard(props.board)
 }
 </script>
 

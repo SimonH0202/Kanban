@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { useCardEditorStore } from '@/stores/cardEditor'
+import { useEditorStore } from '@/stores/editor'
 import type { Tag } from '@/types/Tag'
 import { formatDate } from '@/util/util'
-import KanbanTag from './KanbanTag.vue'
+import KanbanTag from '../components/tags/KanbanTag.vue'
 
 defineProps<{
   id: string
@@ -16,14 +16,14 @@ defineProps<{
   tags: Tag[]
 }>()
 
-const cardEditorStore = useCardEditorStore()
+const editorStore = useEditorStore()
 </script>
 
 <template>
   <article
     class="bg-white dark:bg-gray-800 rounded-sm p-4 text-gray-900 dark:text-gray-300 flex flex-col gap-2 shadow-md cursor-pointer hover:scale-105 hover:shadow-lg transition-transform duration-200"
     @click="
-      cardEditorStore.startEditing({
+      editorStore.startEditingCard({
         id,
         columnId,
         position,

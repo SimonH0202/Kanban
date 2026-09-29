@@ -112,6 +112,27 @@ export const useBoardStore = defineStore('board', () => {
     board.tags.push(createdTag)
   }
 
+  async function deleteTag(tagId: string) {
+    await api.deleteTag(board.id, tagId)
+
+    board.tags = board.tags.filter((tag) => tag.id !== tagId)
+
+    // Remove the tag from all cards in all columns
+    board.columns.forEach((column) => {
+      column.cards.forEach((card) => {
+        card.tags = card.tags.filter((tag) => tag.id !== tagId)
+      })
+    })
+  }
+
+  async function updateTag(tagId: string, updatedTag: { name?: string; color?: string }) {
+    const savedTag = await api.updateTag(board.id, tagId, updatedTag)
+    const tag = board.tags.find((t) => t.id === tagId)
+    if (tag) {
+      Object.assign(tag, savedTag)
+    }
+  }
+
   async function addColumn(column: { title: string }) {
     const createdColumn = await api.createColumn(board.id, column.title)
 
@@ -159,6 +180,8 @@ export const useBoardStore = defineStore('board', () => {
     updateCard,
     moveCard,
     addTag,
+    deleteTag,
+    updateTag,
     deleteCard,
     addColumn,
     updateColumn,

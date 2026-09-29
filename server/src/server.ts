@@ -1198,6 +1198,58 @@ app.delete<{ boardId: string; tagId: string }>(
   },
 );
 
+// Update a tag on a board
+app.patch<{ boardId: string; tagId: string }>(
+  "/boards/:boardId/tags/:tagId",
+  requireAuth,
+  async (req, res) => {
+    try {
+      const { name, color } = req.body;
+
+      if (!name || typeof name !== "string" || name.trim() === "") {
+        res.status(400).json({
+          message: "A tag name is required",
+        });
+        return;
+      }
+
+      if (!color || typeof color !== "string" || color.trim() === "") {
+        res.status(400).json({
+          message: "A tag color is required",
+        });
+        return;
+      }
+
+      // Make sure the user has access to the board
+      const hasAccess = await canAccessBoard(req.userId!, req.params.boardId);
+      if (!hasAccess) {
+        res.status(403).json({
+          message: "You do not have permission to update this tag",
+        });
+        return;
+      }
+
+      const tag = await prisma.tag.update({
+        where: {
+          id: req.params.tagId,
+          boardId: req.params.boardId,
+        },
+        data: {
+          name,
+          color,
+        },
+      });
+
+      res.json(tag);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({
+        message: "Failed to update tag",
+      });
+    }
+  },
+);
+
 // Log server running
 
 app.listen(3000, () => {

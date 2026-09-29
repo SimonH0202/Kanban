@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import { useBoardEditorStore } from '@/stores/boardEditor'
+import { useEditorStore } from '@/stores/editor'
 import { useBoardStore } from '@/stores/board'
 import { onMounted, ref } from 'vue'
-import MemberTag from '@/components/MemberTag.vue'
+import MemberTag from '../tags/MemberTag.vue'
 
-const boardEditorStore = useBoardEditorStore()
+const editorStore = useEditorStore()
 const boardStore = useBoardStore()
 
-const newTitle = ref(boardEditorStore.currentBoard?.title || '')
+const newTitle = ref(editorStore.currentBoard?.title || '')
 const newMemberEmail = ref('')
 
 const result = ref<{ success: boolean; message?: string } | null>(null)
@@ -15,13 +15,13 @@ const result = ref<{ success: boolean; message?: string } | null>(null)
 const members = ref<{ id: string; email: string }[]>([])
 
 async function loadMembers(): Promise<void> {
-  if (!boardEditorStore.currentBoard) {
+  if (!editorStore.currentBoard) {
     members.value = []
     return
   }
 
   try {
-    const membersData = await boardStore.getAllMembers(boardEditorStore.currentBoard.id)
+    const membersData = await boardStore.getAllMembers(editorStore.currentBoard.id)
     members.value = membersData.map((member) => ({
       id: member.userId,
       email: member.user.email,
@@ -35,21 +35,21 @@ async function loadMembers(): Promise<void> {
 onMounted(loadMembers)
 
 function closeEditor() {
-  boardEditorStore.stopEditing()
+  editorStore.stopEditing()
 }
 
 async function saveBoard() {
-  if (!boardEditorStore.currentBoard) return
+  if (!editorStore.currentBoard) return
 
-  await boardStore.updateBoard(boardEditorStore.currentBoard.id, newTitle.value)
+  await boardStore.updateBoard(editorStore.currentBoard.id, newTitle.value)
 
-  boardEditorStore.currentBoard.title = newTitle.value
+  editorStore.currentBoard.title = newTitle.value
 
   closeEditor()
 }
 
 async function addMemberToBoard() {
-  if (!boardEditorStore.currentBoard) return
+  if (!editorStore.currentBoard) return
 
   result.value = null
 
@@ -62,7 +62,7 @@ async function addMemberToBoard() {
   }
 
   try {
-    await boardStore.addMemberToBoard(boardEditorStore.currentBoard.id, newMemberEmail.value)
+    await boardStore.addMemberToBoard(editorStore.currentBoard.id, newMemberEmail.value)
     newMemberEmail.value = ''
     result.value = {
       success: true,
@@ -83,10 +83,10 @@ async function addMemberToBoard() {
 }
 
 async function removeMemberFromBoard(memberId: string) {
-  if (!boardEditorStore.currentBoard) return
+  if (!editorStore.currentBoard) return
 
   try {
-    await boardStore.removeMemberFromBoard(boardEditorStore.currentBoard.id, memberId)
+    await boardStore.removeMemberFromBoard(editorStore.currentBoard.id, memberId)
   } catch (error) {
     if (error instanceof Error) {
       result.value = { success: false, message: `Failed to remove member: ${error.message}` }
@@ -171,7 +171,7 @@ async function removeMemberFromBoard(memberId: string) {
             class="rounded-md bg-blue-500 px-4 py-2 font-medium text-white hover:scale-105 hover:cursor-pointer hover:bg-blue-600"
             @click="saveBoard"
           >
-            Save
+            Save Changes
           </button>
         </div>
       </div>

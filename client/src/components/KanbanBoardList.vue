@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { getBoards, createBoard } from '@/api/api'
 import KanbanBoardCard from '@/components/KanbanBoardCard.vue'
-import KanbanBoardEditor from '@/components/KanbanBoardEditor.vue'
-import { useBoardEditorStore } from '@/stores/boardEditor'
+import KanbanBoardEditor from '../components/editors/KanbanBoardEditor.vue'
+import { useEditorStore } from '@/stores/editor'
 import type { BoardListItem } from '@/types/Items'
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
@@ -12,7 +12,7 @@ import { useBoardStore } from '@/stores/board'
 const router = useRouter()
 const authStore = useAuthStore()
 
-const boardEditorStore = useBoardEditorStore()
+const editorStore = useEditorStore()
 const boardStore = useBoardStore()
 
 const boards = ref<BoardListItem[]>([])
@@ -131,6 +131,6 @@ onMounted(() => {
     >
       + Add Board
     </div>
-    <KanbanBoardEditor v-if="boardEditorStore.isEditing"></KanbanBoardEditor>
+    <KanbanBoardEditor v-if="editorStore.isEditingBoard"></KanbanBoardEditor>
   </main>
 </template>

@@ -4,8 +4,7 @@ import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 
 import { useBoardStore } from '@/stores/board'
-import { useCardEditorStore } from '@/stores/cardEditor'
-import { useBoardEditorStore } from '@/stores/boardEditor'
+import { useEditorStore } from '@/stores/editor'
 
 export const useAuthStore = defineStore('auth', () => {
   const user = ref<User | null>(null)
@@ -22,8 +21,7 @@ export const useAuthStore = defineStore('auth', () => {
     await api.logout()
     user.value = null
     useBoardStore().resetBoard()
-    useCardEditorStore().stopEditing()
-    useBoardEditorStore().stopEditing()
+    useEditorStore().stopEditing()
   }
 
   async function checkAuth() {

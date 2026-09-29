@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useBoardStore } from '@/stores/board'
 import { computed, nextTick, ref } from 'vue'
-import SelectableKanbanTag from '../SelectableKanbanTag.vue'
+import SelectableKanbanTag from '../tags/SelectableKanbanTag.vue'
 import type { Tag } from '@/types/Tag.ts'
 
 const boardStore = useBoardStore()

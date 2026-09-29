@@ -175,3 +175,21 @@ export function createTag(boardId: string, name: string, color: string): Promise
     body: JSON.stringify({ name, color }),
   })
 }
+
+export function updateTag(
+  boardId: string,
+  tagId: string,
+  tag: { name?: string; color?: string },
+): Promise<Tag> {
+  return request<Tag>(`/boards/${boardId}/tags/${tagId}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(tag),
+  })
+}
+
+export function deleteTag(boardId: string, tagId: string): Promise<void> {
+  return request<void>(`/boards/${boardId}/tags/${tagId}`, {
+    method: 'DELETE',
+  })
+}

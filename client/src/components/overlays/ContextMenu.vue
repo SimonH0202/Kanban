@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import type { ContextMenuItem } from '@/types/Items'
 import { nextTick, ref } from 'vue'
-import dotsIcon from '@/assets/icons/dots.png'
 
 defineProps<{
   items: ContextMenuItem[]

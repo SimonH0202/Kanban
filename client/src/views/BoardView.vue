@@ -1,15 +1,16 @@
 <script setup lang="ts">
 import KanbanBoard from '@/components/KanbanBoard.vue'
-import KanbanCardEditor from '@/components/KanbanCardEditor.vue'
-import { useCardEditorStore } from '@/stores/cardEditor'
+import KanbanCardEditor from '@/components/editors/KanbanCardEditor.vue'
+import { useEditorStore } from '@/stores/editor'
 import { useBoardStore } from '@/stores/board'
 import { ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import KanbanBoardList from '@/components/KanbanBoardList.vue'
 import ActionConfirmation from '@/components/overlays/ActionConfirmation.vue'
+import KanbanTagEditor from '@/components/editors/KanbanTagEditor.vue'
 
 const boardData = useBoardStore()
-const cardEditorStore = useCardEditorStore()
+const editorStore = useEditorStore()
 const route = useRoute()
 
 const isLoading = ref(false)
@@ -56,7 +57,8 @@ watch(
     </div>
     <template v-else-if="boardData.board">
       <KanbanBoard :data="boardData.board" />
-      <KanbanCardEditor v-if="cardEditorStore.isEditing" />
+      <KanbanCardEditor v-if="editorStore.isEditingCard" />
+      <KanbanTagEditor v-if="editorStore.isEditingTags" />
     </template>
     <ActionConfirmation />
   </div>
