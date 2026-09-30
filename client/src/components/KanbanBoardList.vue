@@ -110,7 +110,7 @@ onMounted(() => {
     class="hidden h-full min-h-0 w-fit shrink-0 flex-col items-center justify-start gap-2 overflow-y-auto border-r border-gray-300 bg-white px-2 lg:flex dark:border-gray-700 dark:bg-gray-800"
   >
     <div
-      class="w-full h-fit py-2 flex items-center justify-between border-b border-gray-300 dark:border-gray-700"
+      class="w-full h-fit py-2 gap-4 flex items-center justify-between border-b border-gray-300 dark:border-gray-700"
     >
       <span class="text-gray-900 dark:text-gray-300 text-md font-bold">
         {{ authStore.user?.email || 'Boards' }}

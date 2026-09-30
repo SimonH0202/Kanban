@@ -103,6 +103,7 @@ function deleteColumn() {
       class="flex min-h-0 flex-col gap-2 overflow-y-auto p-4"
       item-key="id"
       group="cards"
+      ghost-class="card-ghost"
       @end="updateColumn"
       :options="{
         animation: 200,
@@ -129,3 +130,11 @@ function deleteColumn() {
     </button>
   </div>
 </template>
+
+<style scoped>
+:deep(.card-ghost) {
+  opacity: 0.35;
+  outline: 2px dashed #60a5fa;
+  outline-offset: -2px;
+}
+</style>
