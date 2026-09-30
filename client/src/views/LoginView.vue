@@ -124,7 +124,7 @@ async function resendVerification() {
         v-if="needsVerification"
         type="button"
         :disabled="isLoading || isResending"
-        class="shrink-0 rounded-sm bg-gray-200 p-2 text-gray-900 enabled:hover:cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 dark:bg-gray-700 dark:text-gray-300"
+        class="shrink-0 rounded-sm bg-gray-200 p-2 text-gray-900 hover:cursor-pointer hover:scale-101 disabled:cursor-not-allowed disabled:opacity-50 disabled:scale-100 dark:bg-gray-700 dark:text-gray-300"
         @click="resendVerification"
       >
         {{ isResending ? 'Sending...' : 'Resend verification email' }}
@@ -133,7 +133,7 @@ async function resendVerification() {
       <button
         type="submit"
         :disabled="isLoading || isResending"
-        class="shrink-0 rounded-sm bg-blue-600 p-2 text-white hover:scale-101 hover:cursor-pointer disabled:opacity-50"
+        class="shrink-0 rounded-sm bg-blue-600 p-2 text-white hover:scale-101 hover:cursor-pointer disabled:opacity-50 disabled:scale-100"
       >
         {{ isLoading ? 'Logging in...' : 'Log In' }}
       </button>
