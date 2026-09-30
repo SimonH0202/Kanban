@@ -32,7 +32,10 @@ export const useBoardStore = defineStore('board', () => {
 
   async function updateBoard(boardId: string, newTitle: string) {
     const updatedBoard = await api.updateBoard(boardId, { title: newTitle })
-    board.title = updatedBoard.title
+
+    if (board.id === updatedBoard.id) {
+      board.title = updatedBoard.title
+    }
   }
 
   async function deleteBoard(boardId: string) {

@@ -20,6 +20,8 @@ const newMemberEmail = ref('')
 const loadMembersResult = ref<{ success: boolean; message?: string } | null>(null)
 const result = ref<{ success: boolean; message?: string } | null>(null)
 
+const isSaving = ref(false)
+
 const members = ref<{ id: string; email: string }[]>([])
 
 const unsavedChanges = computed(() => {
@@ -72,6 +74,8 @@ function closeEditor() {
 async function saveBoard() {
   if (!editorStore.currentBoard) return
 
+  isSaving.value = true
+
   try {
     await boardStore.updateBoard(editorStore.currentBoard.id, newTitle.value)
     editorStore.currentBoard.title = newTitle.value
@@ -82,6 +86,8 @@ async function saveBoard() {
       success: false,
       message: 'Failed to save board. Please try again.',
     }
+  } finally {
+    isSaving.value = false
   }
 }
 
@@ -211,6 +217,7 @@ async function performRemoveMember(memberId: string) {
             class="w-full rounded-sm border border-gray-200 bg-white p-2 text-left text-gray-900 outline-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300"
             type="text"
             aria-label="Board title"
+            :disabled="isSaving"
           />
 
           <div class="flex flex-col gap-2 sm:flex-row">
@@ -257,7 +264,7 @@ async function performRemoveMember(memberId: string) {
           Cancel
         </button>
 
-        <SaveButton :disableOn="!unsavedChanges" @save="saveBoard" />
+        <SaveButton :disableOn="!(unsavedChanges && !isSaving) || isSaving" @save="saveBoard" />
       </div>
     </div>
   </div>
