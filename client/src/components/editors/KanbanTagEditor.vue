@@ -139,7 +139,7 @@ async function saveTag() {
           />
 
           <div class="shrink-0">
-            <SaveButton :disableOn="unsavedChanges" @save="saveTag" />
+            <SaveButton :disableOn="!unsavedChanges" @save="saveTag" />
           </div>
         </div>
       </div>

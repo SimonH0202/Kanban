@@ -52,21 +52,11 @@ export const useConfirmationStore = defineStore('confirmation', () => {
   }
 
   async function confirm() {
-    try {
-      await run(onConfirm.value)
-      isVisible.value = false
-    } catch (err) {
-      error.value = err instanceof Error ? err.message : 'The action failed. Please try again.'
-    }
+    await run(onConfirm.value)
   }
 
   async function cancel() {
-    try {
-      await run(onCancel.value)
-      isVisible.value = false
-    } catch (err) {
-      error.value = err instanceof Error ? err.message : 'The action failed. Please try again.'
-    }
+    await run(onCancel.value)
   }
 
   return {

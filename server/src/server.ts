@@ -617,7 +617,14 @@ app.post<{ boardId: string }>(
       });
 
       if (!user) {
-        res.status(404).json({ message: "User not found" });
+        res.status(404).json({ message: "No user found with this email" });
+        return;
+      }
+
+      if (!user || !user.emailVerifiedAt) {
+        res.status(400).json({
+          message: "No verified account found for this email address",
+        });
         return;
       }
 

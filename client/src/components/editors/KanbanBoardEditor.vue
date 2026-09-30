@@ -257,7 +257,7 @@ async function performRemoveMember(memberId: string) {
           Cancel
         </button>
 
-        <SaveButton :disableOn="unsavedChanges" @save="saveBoard" />
+        <SaveButton :disableOn="!unsavedChanges" @save="saveBoard" />
       </div>
     </div>
   </div>
