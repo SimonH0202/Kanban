@@ -6,7 +6,7 @@ import type { ColumnCardOrder } from '@/types/ColumnCardOrder'
 import type { Tag } from '@/types/Tag'
 import type { User } from '@/types/User'
 
-const API_URL = 'http://localhost:3000'
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
 
 export class ApiError extends Error {
   constructor(
