@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import { register, resendVerificationEmail } from '@/api/api'
 import { useRouter } from 'vue-router'
+import PasswordInput from '@/components/input/PasswordInput.vue'
 
 const router = useRouter()
 
@@ -103,15 +104,7 @@ async function resendVerification() {
         <div class="flex flex-col md:flex-row lg:flex-col gap-4">
           <div class="flex flex-col gap-1 w-full">
             <label for="password">Password</label>
-            <input
-              id="password"
-              v-model="password"
-              type="password"
-              autocomplete="new-password"
-              required
-              class="rounded-sm h-8 lg:h-12 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 p-2 text-gray-900 dark:text-gray-300 outline-blue-500"
-              :disabled="isLoading || accountCreated"
-            />
+            <PasswordInput v-model:password="password" :disabled="isLoading || accountCreated" />
             <p class="text-xs text-gray-500 dark:text-gray-400">
               Use at least 15 characters. Spaces are allowed.
             </p>
@@ -119,13 +112,8 @@ async function resendVerification() {
 
           <div class="flex flex-col gap-1 w-full">
             <label for="confirm-password">Confirm Password</label>
-            <input
-              id="confirm-password"
-              v-model="confirmPassword"
-              type="password"
-              autocomplete="new-password"
-              required
-              class="rounded-sm h-8 lg:h-12 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 p-2 text-gray-900 dark:text-gray-300 outline-blue-500"
+            <PasswordInput
+              v-model:password="confirmPassword"
               :disabled="isLoading || accountCreated"
             />
           </div>

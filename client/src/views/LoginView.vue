@@ -4,6 +4,7 @@ import { useAuthStore } from '@/stores/auth'
 import router from '@/router'
 import { useRoute } from 'vue-router'
 import { ApiError, resendVerificationEmail } from '@/api/api'
+import PasswordInput from '@/components/input/PasswordInput.vue'
 
 const authStore = useAuthStore()
 const route = useRoute()
@@ -91,14 +92,7 @@ async function resendVerification() {
 
         <div class="flex w-full flex-col gap-1">
           <label for="password">Password</label>
-          <input
-            id="password"
-            v-model="password"
-            type="password"
-            autocomplete="current-password"
-            required
-            class="h-8 rounded-sm border border-gray-300 bg-white p-2 text-gray-900 outline-blue-500 lg:h-12 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300"
-          />
+          <PasswordInput v-model:password="password" />
         </div>
       </div>
 
