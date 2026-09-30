@@ -19,7 +19,9 @@ const newTagColor = ref(selectedTag.value?.color || '#000000')
 
 const unsavedChanges = computed(() => {
   if (!selectedTag.value) return false
-  return newTagName.value !== selectedTag.value.name || newTagColor.value !== selectedTag.value.color
+  return (
+    newTagName.value !== selectedTag.value.name || newTagColor.value !== selectedTag.value.color
+  )
 })
 
 function closeEditor() {
@@ -61,7 +63,10 @@ function editTag(tagId: string) {
 async function saveTag() {
   if (!boardStore.board || !selectedTag.value) return
 
-  await boardStore.updateTag(selectedTag.value.id, { name: newTagName.value, color: newTagColor.value })
+  await boardStore.updateTag(selectedTag.value.id, {
+    name: newTagName.value,
+    color: newTagColor.value,
+  })
 
   selectedTag.value = null
   newTagName.value = ''
@@ -70,21 +75,33 @@ async function saveTag() {
 </script>
 
 <template>
-  <div class="fixed inset-0 z-50 flex items-center justify-center">
-    <button class="fixed inset-0 backdrop-blur-sm" @click="closeEditor"></button>
-    <div class="z-50 bg-white dark:bg-gray-800 rounded-sm shadow-lg w-200 flex flex-col gap-4">
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-2">
+    <button
+      class="fixed inset-0 backdrop-blur-sm"
+      aria-label="Close tag editor"
+      @click="closeEditor"
+    ></button>
+
+    <div
+      class="relative z-50 flex max-h-[calc(100svh-1rem)] w-full max-w-200 flex-col overflow-hidden rounded-sm bg-white shadow-lg dark:bg-gray-800"
+    >
+      <!-- Header -->
       <div
-        class="flex justify-between items-center p-4 border-b border-gray-300 dark:border-gray-700 text-gray-900 dark:text-gray-300"
+        class="flex shrink-0 items-center justify-between border-b border-gray-300 p-4 text-gray-900 dark:border-gray-700 dark:text-gray-300"
       >
         <h1 class="text-lg font-bold">Tag Editor</h1>
+
         <button
-          class="text-lg font-bold hover:scale-105 hover:cursor-pointer dark:text-gray-300"
+          class="text-lg font-bold hover:cursor-pointer"
+          aria-label="Close tag editor"
           @click="closeEditor"
         >
           ✕
         </button>
       </div>
-      <div class="p-8 text-gray-900 dark:text-gray-300">
+
+
+      <div class="min-h-0 overflow-y-auto p-4 text-gray-900 lg:p-8 dark:text-gray-300">
         <div class="flex flex-wrap gap-2">
           <EditableKanbanTag
             v-for="tag in boardStore.board?.tags || []"
@@ -92,33 +109,39 @@ async function saveTag() {
             :id="tag.id"
             :name="tag.name"
             :color="tag.color"
-            @delete-tag="(tagId: string) => deleteTag(tagId)"
-            @edit-tag="(tagId: string) => editTag(tagId)"
+            @delete-tag="deleteTag"
+            @edit-tag="editTag"
           />
         </div>
       </div>
-      <div class="flex flex-col gap-2 p-8">
-        <EditedKanbanTag
-          v-if="selectedTag"
-          :name="newTagName"
-          :color="newTagColor"
-          />
-        <div class="flex justify-end gap-2">
+
+      <!-- Footer -->
+      <div
+        class="flex shrink-0 flex-col gap-2 border-t border-gray-300 p-4 lg:p-8 dark:border-gray-700"
+      >
+        <EditedKanbanTag v-if="selectedTag" :name="newTagName" :color="newTagColor" />
+
+        <div class="flex items-center justify-end gap-2">
           <input
             id="new-tag-name"
             v-model="newTagName"
             :disabled="!selectedTag"
-            class="grow rounded-sm border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-2 text-left text-gray-900 dark:text-gray-300 outline-blue-500"
-          >
-          </input>
-          <input
-            type="color"
-            class="h-full aspect-square px-0.5 rounded-sm border border-gray-200 bg-white dark:bg-gray-800 dark:border-gray-700 text-left text-gray-900 outline-blue-500 hover:cursor-pointer"
-            v-model="newTagColor"
-            :disabled="!selectedTag"
+            aria-label="Tag name"
+            class="min-w-0 flex-1 rounded-sm border border-gray-200 bg-white p-2 text-left text-gray-900 outline-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300"
+            type="text"
           />
 
-          <SaveButton :unsavedChanges="unsavedChanges" @save="saveTag" />
+          <input
+            v-model="newTagColor"
+            :disabled="!selectedTag"
+            type="color"
+            aria-label="Tag color"
+            class="h-10 w-10 shrink-0 rounded-sm border border-gray-200 bg-white px-0.5 outline-blue-500 hover:cursor-pointer dark:border-gray-700 dark:bg-gray-800"
+          />
+
+          <div class="shrink-0">
+            <SaveButton :unsavedChanges="unsavedChanges" @save="saveTag" />
+          </div>
         </div>
       </div>
     </div>

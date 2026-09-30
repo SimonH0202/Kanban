@@ -49,17 +49,21 @@ watch(
 </script>
 
 <template>
-  <div class="flex flex-row">
+  <div class="flex h-dvh min-h-0 flex-col overflow-hidden lg:flex-row">
     <KanbanBoardList />
-    <div v-if="showLoading" class="p-6 w-full text-center text-lg">Loading...</div>
-    <div v-else-if="error" class="text-red-500 text-lg p-6 w-full text-center" role="alert">
-      {{ error }}
+
+    <div class="min-h-0 min-w-0 flex-1 overflow-hidden">
+      <div v-if="showLoading" class="w-full p-6 text-center text-lg">Loading...</div>
+
+      <div v-else-if="error" class="w-full p-6 text-center text-lg text-red-500" role="alert">
+        {{ error }}
+      </div>
+
+      <KanbanBoard v-else :data="boardData.board" />
     </div>
-    <template v-else>
-      <KanbanBoard :data="boardData.board" />
-      <KanbanCardEditor v-if="editorStore.isEditingCard" />
-      <KanbanTagEditor v-if="editorStore.isEditingTags" />
-    </template>
+
+    <KanbanCardEditor v-if="editorStore.isEditingCard" />
+    <KanbanTagEditor v-if="editorStore.isEditingTags" />
     <ActionConfirmation />
   </div>
 </template>

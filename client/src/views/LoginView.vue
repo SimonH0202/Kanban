@@ -37,61 +37,70 @@ async function submit() {
 
 <template>
   <main
-    class="flex min-h-screen items-center justify-center bg-linear-to-r from-green-500 to-indigo-500 dark:bg-linear-to-r dark:from-indigo-900 dark:to-rose-900"
+    class="flex h-svh w-full items-center justify-center bg-linear-to-r from-green-500 to-indigo-500 dark:from-indigo-900 dark:to-rose-900"
   >
     <form
-      class="flex w-full max-w-sm flex-col gap-4 rounded-lg bg-white dark:bg-gray-800 p-8 shadow-md dark:text-gray-300"
+      class="flex max-h-full w-full flex-col overflow-y-auto rounded-lg bg-white p-8 shadow-md lg:max-w-sm lg:gap-4 dark:bg-gray-800 dark:text-gray-300"
       @submit.prevent="submit"
     >
-      <div>
+      <div class="mb-4 shrink-0">
         <h1 class="text-2xl font-bold">Log In</h1>
         <p class="text-sm text-gray-500">Log in to your account to start organizing your boards.</p>
       </div>
 
-      <div class="flex flex-col gap-1">
-        <label for="email">Email</label>
-        <input
-          id="email"
-          v-model="email"
-          type="email"
-          autocomplete="email"
-          required
-          class="rounded-sm border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 p-2 text-gray-900 dark:text-gray-300 outline-blue-500"
-        />
+      <div class="flex w-full shrink-0 flex-col gap-4">
+        <div class="flex w-full flex-col gap-1">
+          <label for="email">Email</label>
+          <input
+            id="email"
+            v-model="email"
+            type="email"
+            autocomplete="email"
+            required
+            class="h-8 rounded-sm border border-gray-300 bg-white p-2 text-gray-900 outline-blue-500 lg:h-12 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300"
+          />
+        </div>
+
+        <div class="flex w-full flex-col gap-1">
+          <label for="password">Password</label>
+          <input
+            id="password"
+            v-model="password"
+            type="password"
+            autocomplete="current-password"
+            required
+            class="h-8 rounded-sm border border-gray-300 bg-white p-2 text-gray-900 outline-blue-500 lg:h-12 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300"
+          />
+        </div>
       </div>
 
-      <div class="flex flex-col gap-1">
-        <label for="password">Password</label>
-        <input
-          id="password"
-          v-model="password"
-          type="password"
-          autocomplete="new-password"
-          required
-          class="rounded-sm border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 p-2 text-gray-900 dark:text-gray-300 outline-blue-500"
-        />
-      </div>
-
-      <p v-if="route.query.registered === '1'" class="text-sm text-green-600">
+      <p
+        v-if="route.query.registered === '1'"
+        class="shrink-0 text-sm text-green-600"
+        role="status"
+      >
         Account created successfully! Please log in.
       </p>
 
-      <p v-if="error" class="text-sm text-red-600 h-5 w-full">
+      <p
+        class="min-h-5 w-full shrink-0 break-words text-sm text-red-600"
+        :role="error ? 'alert' : undefined"
+      >
         {{ error }}
       </p>
-      <p v-else class="h-5 w-full"></p>
 
       <button
         type="submit"
         :disabled="isLoading"
-        class="rounded-sm bg-blue-600 p-2 text-white disabled:opacity-50 hover:scale-101 hover:cursor-pointer"
+        class="shrink-0 rounded-sm bg-blue-600 p-2 text-white hover:scale-101 hover:cursor-pointer disabled:opacity-50"
       >
         {{ isLoading ? 'Logging in...' : 'Log In' }}
       </button>
 
-      <p class="text-sm text-gray-500">
+      <p class="shrink-0 text-sm text-gray-500">
         Don't have an account?
-        <RouterLink to="/register" class="text-blue-600 hover:underline">Register here</RouterLink>.
+        <RouterLink to="/register" class="text-blue-600 hover:underline"> Register here</RouterLink
+        >.
       </p>
     </form>
   </main>

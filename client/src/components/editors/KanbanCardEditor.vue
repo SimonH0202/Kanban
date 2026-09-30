@@ -114,22 +114,27 @@ function removeTag(id: string) {
 </script>
 
 <template>
-  <div class="fixed inset-0 z-50 flex items-center justify-center">
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-2">
     <button
       class="fixed inset-0 backdrop-blur-sm"
       aria-label="Close card editor"
       @click="closeEditor"
     ></button>
 
-    <div class="z-50 w-200 rounded-sm bg-white dark:bg-gray-800 shadow-lg">
+    <div
+      class="relative z-50 flex max-h-[calc(100svh-1rem)] w-full max-w-200 flex-col overflow-hidden rounded-sm bg-white shadow-lg dark:bg-gray-800"
+    >
+      <!-- Header -->
       <div
-        class="flex justify-between items-center p-4 border-b border-gray-300 dark:border-gray-700"
+        class="flex shrink-0 items-center justify-between border-b border-gray-300 p-4 dark:border-gray-700"
       >
         <h1 class="text-lg font-bold">Card Editor</h1>
+
         <div class="flex items-center gap-2">
           <ContextMenu :items="menuItems" />
+
           <button
-            class="text-lg font-bold text-gray-900 dark:text-gray-300 hover:cursor-pointer"
+            class="text-lg font-bold text-gray-900 hover:cursor-pointer dark:text-gray-300"
             aria-label="Close card editor"
             @click="closeEditor"
           >
@@ -138,7 +143,10 @@ function removeTag(id: string) {
         </div>
       </div>
 
-      <div class="p-8 flex flex-col gap-4 text-gray-900 dark:text-gray-300">
+      <!-- Scrollable content -->
+      <div
+        class="flex min-h-0 flex-col gap-4 overflow-y-auto p-4 text-gray-900 lg:p-8 dark:text-gray-300"
+      >
         <div class="flex flex-wrap gap-2">
           <KanbanTag
             v-for="tag in newTags"
@@ -151,10 +159,11 @@ function removeTag(id: string) {
 
           <TagSelector :current-tags="newTags" @select-tag="addTag" />
         </div>
+
         <input
           id="card-title"
           v-model="newTitle"
-          class="w-full rounded-sm border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-2 text-left text-gray-900 dark:text-gray-300 outline-blue-500"
+          class="w-full shrink-0 rounded-sm border border-gray-200 bg-white p-2 text-left text-gray-900 outline-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300"
           type="text"
         />
 
@@ -162,12 +171,12 @@ function removeTag(id: string) {
           id="card-due-date"
           v-model="newDueDate"
           type="date"
-          class="w-32 bg-gray-200 dark:bg-indigo-900 dark:text-gray-300 rounded-md py-1 px-2 hover:cursor-pointer"
+          class="w-32 shrink-0 rounded-md bg-gray-200 px-2 py-1 hover:cursor-pointer dark:bg-indigo-900 dark:text-gray-300"
         />
 
         <label
           for="card-description"
-          class="text-md font-medium text-gray-800 dark:text-gray-300 pt-8"
+          class="text-md font-medium text-gray-800 lg:pt-8 dark:text-gray-300"
         >
           Description
         </label>
@@ -175,22 +184,26 @@ function removeTag(id: string) {
         <textarea
           id="card-description"
           v-model="newDescription"
-          class="w-full min-h-60 p-2 text-left bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-300 text-md rounded-sm border border-gray-200 dark:border-gray-700 outline-blue-500"
+          class="text-md min-h-16 w-full shrink-0 rounded-sm border border-gray-200 bg-white p-2 text-left text-gray-900 outline-blue-500 lg:min-h-60 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300"
         ></textarea>
 
         <p v-if="saveError" class="text-red-500" role="alert">
           {{ saveError }}
         </p>
+      </div>
 
-        <div class="mt-4 flex justify-end gap-2">
-          <button
-            class="rounded-md bg-gray-200 dark:bg-gray-600 px-4 py-2 font-medium text-gray-800 dark:text-gray-300 hover:scale-105 hover:cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-500"
-            @click="closeEditor"
-          >
-            Cancel
-          </button>
-          <SaveButton :unsavedChanges="unsavedChanges || isSaving" @save="saveCard" />
-        </div>
+      <!-- Footer -->
+      <div
+        class="flex shrink-0 justify-end gap-2 border-t border-gray-300 p-4 lg:p-8 dark:border-gray-700"
+      >
+        <button
+          class="rounded-md bg-gray-200 px-4 py-2 font-medium text-gray-800 hover:scale-105 hover:cursor-pointer hover:bg-gray-300 dark:bg-gray-600 dark:text-gray-300 dark:hover:bg-gray-500"
+          @click="closeEditor"
+        >
+          Cancel
+        </button>
+
+        <SaveButton :unsavedChanges="unsavedChanges || isSaving" @save="saveCard" />
       </div>
     </div>
   </div>

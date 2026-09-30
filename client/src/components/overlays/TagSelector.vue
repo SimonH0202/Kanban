@@ -65,9 +65,11 @@ async function addNewTag() {
 </script>
 
 <template>
+  <!-- Stays inside the Kanban column -->
   <button
     ref="buttonRef"
-    class="rounded-sm px-2 py-1 size-sm text-gray-900 font-bold bg-gray-200 dark:bg-indigo-900 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-indigo-800 text-center hover:cursor-pointer"
+    class="rounded-sm bg-gray-200 px-2 py-1 text-center font-bold text-gray-900 hover:cursor-pointer hover:bg-gray-300 dark:bg-indigo-900 dark:text-gray-300 dark:hover:bg-indigo-800"
+    aria-label="Select tags"
     @click="openSelector"
   >
     +
@@ -83,11 +85,10 @@ async function addNewTag() {
 
     <div
       v-if="isActive"
-      class="fixed z-100 w-2xs rounded-sm bg-white dark:bg-gray-800 shadow-lg flex flex-wrap gap-2 p-2"
+      class="fixed left-1/2 top-1/2 z-100 flex max-h-[calc(100svh-2rem)] w-2xs max-w-[calc(100vw-2rem)] -translate-x-1/2 -translate-y-1/2 flex-wrap gap-2 overflow-y-auto rounded-sm bg-white p-2 shadow-lg sm:left-(--selector-x) sm:top-(--selector-y) sm:-translate-x-full sm:translate-y-0 dark:bg-gray-800"
       :style="{
-        left: `${selectorX}px`,
-        top: `${selectorY}px`,
-        transform: 'translateX(-100%)',
+        '--selector-x': `${selectorX}px`,
+        '--selector-y': `${selectorY}px`,
       }"
     >
       <SelectableKanbanTag
@@ -98,26 +99,29 @@ async function addNewTag() {
         :color="tag.color"
         @selectTag="emit('selectTag', tag.id)"
       />
-      <form class="w-full flex flex-col gap-2">
-        <div class="flex gap-2">
+
+      <form class="flex w-full flex-col gap-2" @submit.prevent="addNewTag">
+        <div class="flex items-center gap-2">
           <input
+            v-model="newTagName"
             type="text"
             maxlength="20"
             placeholder="New tag name"
-            class="w-full rounded-sm border border-gray-200 bg-white dark:bg-gray-800 dark:border-gray-700 p-2 text-left text-gray-900 dark:text-gray-300 outline-blue-500"
-            v-model="newTagName"
+            aria-label="New tag name"
+            class="min-w-0 flex-1 rounded-sm border border-gray-200 bg-white p-2 text-left text-gray-900 outline-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300"
           />
+
           <input
-            type="color"
-            class="h-full aspect-square px-0.5 rounded-sm border border-gray-200 bg-white dark:bg-gray-800 dark:border-gray-700 text-left text-gray-900 outline-blue-500 hover:cursor-pointer"
             v-model="newTagColor"
+            type="color"
+            aria-label="New tag color"
+            class="h-10 w-10 shrink-0 rounded-sm border border-gray-200 bg-white px-0.5 outline-blue-500 hover:cursor-pointer dark:border-gray-700 dark:bg-gray-800"
           />
         </div>
 
         <button
-          type="button"
-          class="w-full rounded-sm bg-blue-600 p-2 text-white disabled:opacity-50 hover:scale-101 hover:cursor-pointer"
-          @click="addNewTag"
+          type="submit"
+          class="w-full rounded-sm bg-blue-600 p-2 text-white hover:scale-101 hover:cursor-pointer disabled:opacity-50"
         >
           Add Tag
         </button>

@@ -136,81 +136,106 @@ async function removeMemberFromBoard(memberId: string) {
 </script>
 
 <template>
-  <div class="fixed inset-0 z-50 flex items-center justify-center">
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-2">
     <button
       class="fixed inset-0 backdrop-blur-sm"
-      aria-label="Close editor"
+      aria-label="Close board editor"
       @click="closeEditor"
     ></button>
 
-    <div class="z-50 w-200 rounded-sm bg-white dark:bg-gray-800 shadow-lg">
+    <div
+      class="relative z-50 flex max-h-[calc(100svh-1rem)] w-full max-w-200 flex-col overflow-hidden rounded-sm bg-white shadow-lg dark:bg-gray-800"
+    >
+      <!-- Header -->
       <div
-        class="flex items-center justify-between border-b border-gray-300 dark:border-gray-700 p-4 text-gray-900 dark:text-gray-300"
+        class="flex shrink-0 items-center justify-between border-b border-gray-300 p-4 text-gray-900 dark:border-gray-700 dark:text-gray-300"
       >
         <h1 v-if="isOwner" class="text-lg font-bold">Board Editor</h1>
         <h1 v-else class="text-lg font-bold">Board Members</h1>
-        <button class="text-lg font-bold hover:scale-105 hover:cursor-pointer" @click="closeEditor">
+
+        <button
+          class="text-lg font-bold hover:scale-105 hover:cursor-pointer"
+          aria-label="Close board editor"
+          @click="closeEditor"
+        >
           ✕
         </button>
       </div>
-      <div class="flex flex-wrap gap-2 p-8">
-        <MemberTag
-          :id="editorStore.currentBoard?.ownerId || ''"
-          :email="editorStore.currentBoard?.owner?.email || ''"
-          :showDeleteButton="false"
-        />
-        <MemberTag
-          v-for="member in members"
-          :key="member.id"
-          :id="member.id"
-          :email="member.email"
-          :showDeleteButton="isOwner"
-          @remove-member="removeMemberFromBoard"
-        />
-      </div>
-      <div v-if="isOwner" class="flex flex-col gap-4 p-8 text-gray-900 dark:text-gray-300">
-        <input
-          id="board-title"
-          v-model="newTitle"
-          class="w-full rounded-sm border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-2 text-left text-gray-900 dark:text-gray-300 outline-blue-500"
-          type="text"
-        />
-        <div class="flex">
-          <input
-            id="board-member-email"
-            v-model="newMemberEmail"
-            class="w-full rounded-sm border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-2 text-left text-gray-900 dark:text-gray-300 outline-blue-500"
-            type="email"
-            placeholder="Enter member's email"
+
+      <!-- Scrollable content -->
+      <div class="min-h-0 overflow-y-auto p-4 text-gray-900 lg:p-8 dark:text-gray-300">
+        <div class="flex flex-wrap gap-2">
+          <MemberTag
+            :id="editorStore.currentBoard?.ownerId || ''"
+            :email="editorStore.currentBoard?.owner?.email || ''"
+            :showDeleteButton="false"
           />
-          <button
-            class="ml-2 rounded-md bg-blue-500 px-4 py-2 font-medium text-white hover:scale-105 hover:cursor-pointer hover:bg-blue-600 w-2xs"
-            @click="addMemberToBoard"
-          >
-            Add Member
-          </button>
-        </div>
-        <span
-          class="ml-2 opacity-0 h-4"
-          :class="{
-            'opacity-100 text-red-500': result && !result.success,
-            'opacity-100 text-green-500': result && result.success,
-          }"
-          >{{ result?.message }}
-        </span>
 
-        <div v-if="isOwner" class="mt-4 flex justify-end gap-2">
-          <button
-            class="rounded-md bg-gray-200 dark:bg-gray-600 px-4 py-2 font-medium text-gray-800 dark:text-gray-300 hover:scale-105 hover:cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-500"
-            @click="closeEditor"
-          >
-            Cancel
-          </button>
-
-          <SaveButton :unsavedChanges="unsavedChanges" @save="saveBoard" />
+          <MemberTag
+            v-for="member in members"
+            :key="member.id"
+            :id="member.id"
+            :email="member.email"
+            :showDeleteButton="isOwner"
+            @remove-member="removeMemberFromBoard"
+          />
         </div>
+
+        <div v-if="isOwner" class="mt-6 flex flex-col gap-4">
+          <input
+            id="board-title"
+            v-model="newTitle"
+            class="w-full rounded-sm border border-gray-200 bg-white p-2 text-left text-gray-900 outline-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300"
+            type="text"
+            aria-label="Board title"
+          />
+
+          <div class="flex flex-col gap-2 sm:flex-row">
+            <input
+              id="board-member-email"
+              v-model="newMemberEmail"
+              class="min-w-0 flex-1 rounded-sm border border-gray-200 bg-white p-2 text-left text-gray-900 outline-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300"
+              type="email"
+              aria-label="Member email"
+              placeholder="Enter member's email"
+            />
+
+            <button
+              class="shrink-0 rounded-md bg-blue-500 px-4 py-2 font-medium text-white hover:scale-105 hover:cursor-pointer hover:bg-blue-600"
+              @click="addMemberToBoard"
+            >
+              Add Member
+            </button>
+          </div>
+
+          <p
+            v-if="result?.message"
+            class="wrap-break-word"
+            :class="{
+              'text-red-500': !result.success,
+              'text-green-500': result.success,
+            }"
+            role="status"
+          >
+            {{ result.message }}
+          </p>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div
+        v-if="isOwner"
+        class="flex shrink-0 justify-end gap-2 border-t border-gray-300 p-4 lg:p-8 dark:border-gray-700"
+      >
+        <button
+          class="rounded-md bg-gray-200 px-4 py-2 font-medium text-gray-800 hover:scale-105 hover:cursor-pointer hover:bg-gray-300 dark:bg-gray-600 dark:text-gray-300 dark:hover:bg-gray-500"
+          @click="closeEditor"
+        >
+          Cancel
+        </button>
+
+        <SaveButton :unsavedChanges="unsavedChanges" @save="saveBoard" />
       </div>
     </div>
   </div>
 </template>
-```

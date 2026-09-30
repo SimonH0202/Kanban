@@ -73,29 +73,34 @@ function deleteColumn() {
 </script>
 
 <template>
-  <div class="w-80 h-fit flex flex-col bg-white/10 backdrop-blur-lg rounded-sm shadow-lg">
-    <div class="bg-transparent flex flex-row justify-between items-center p-4">
+  <div
+    class="flex h-fit max-h-full min-h-0 w-80 shrink-0 flex-col overflow-hidden rounded-sm bg-white/10 shadow-lg backdrop-blur-lg"
+  >
+    <div class="flex shrink-0 items-center justify-between bg-transparent p-4">
       <button
         v-if="!isInputActive"
-        class="flex items-center font-bold bg-blue-500 text-white rounded-full py-1 px-3 hover:scale-105 hover:cursor-pointer"
+        class="rounded-full bg-blue-500 px-3 py-1 font-bold text-white hover:scale-105 hover:cursor-pointer"
         @click="activateInput"
       >
         {{ data.title }}
       </button>
+
       <input
         v-else
         ref="inputRef"
-        class="font-bold bg-blue-500 text-white rounded-sm py-1 px-3 outline-none"
+        class="min-w-0 rounded-sm bg-blue-500 px-3 py-1 font-bold text-white outline-none"
         type="text"
         :value="data.title"
         @blur="updateTitle"
         @keyup.enter="updateTitle"
       />
-      <ContextMenu :items="menuItems" :dotColor="'white'"></ContextMenu>
+
+      <ContextMenu :items="menuItems" :dotColor="'white'" />
     </div>
+
     <draggable
       v-model="data.cards"
-      class="p-4 flex flex-col gap-2 overflow-y-auto"
+      class="flex min-h-0 flex-col gap-2 overflow-y-auto p-4"
       item-key="id"
       group="cards"
       @end="updateColumn"
@@ -104,20 +109,22 @@ function deleteColumn() {
       }"
     >
       <KanbanCard
-        v-for="card in data.cards"
+        v-for="(card, index) in data.cards"
         :key="card.id"
         :id="card.id"
         :columnId="card.columnId"
-        :position="data.cards.indexOf(card)"
+        :position="index"
         :title="card.title"
         :description="card.description"
         :dueDate="card.dueDate"
         :createdAt="card.createdAt"
         :updatedAt="card.updatedAt"
         :tags="card.tags"
+        class="shrink-0"
       />
     </draggable>
-    <button @click="addCard" class="text-white hover:scale-105 hover:cursor-pointer p-2">
+
+    <button class="shrink-0 p-2 text-white hover:scale-105 hover:cursor-pointer" @click="addCard">
       + Add Card
     </button>
   </div>

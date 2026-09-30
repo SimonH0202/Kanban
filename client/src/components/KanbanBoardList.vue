@@ -8,6 +8,7 @@ import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useBoardStore } from '@/stores/board'
+import BurgerMenuButton from './buttons/BurgerMenuButton.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -19,6 +20,8 @@ const boards = ref<BoardListItem[]>([])
 const isLoading = ref(false)
 const showLoading = ref(false)
 const error = ref('')
+
+const isSidebarOpen = ref(false)
 
 async function loadBoards() {
   isLoading.value = true
@@ -88,6 +91,10 @@ async function deleteBoard(boardId: string) {
   }
 }
 
+function toggleSidebar() {
+  isSidebarOpen.value = !isSidebarOpen.value
+}
+
 async function logout() {
   await authStore.logout()
   router.push('/login')
@@ -100,7 +107,7 @@ onMounted(() => {
 
 <template>
   <main
-    class="w-fit min-w-sm h-screen flex flex-col items-center justify-start gap-2 px-2 bg-white dark:bg-gray-800 border-r border-gray-300 dark:border-gray-700"
+    class="hidden h-full min-h-0 w-fit shrink-0 flex-col items-center justify-start gap-2 overflow-y-auto border-r border-gray-300 bg-white px-2 lg:flex dark:border-gray-700 dark:bg-gray-800"
   >
     <div
       class="w-full h-fit py-2 flex items-center justify-between border-b border-gray-300 dark:border-gray-700"
@@ -131,6 +138,39 @@ onMounted(() => {
     >
       + Add Board
     </div>
-    <KanbanBoardEditor v-if="editorStore.isEditingBoard"></KanbanBoardEditor>
+  </main>
+  <KanbanBoardEditor v-if="editorStore.isEditingBoard"></KanbanBoardEditor>
+  <main class="max-h-full w-full shrink-0 overflow-y-auto px-2 lg:hidden">
+    <div
+      class="w-full h-fit py-2 flex items-center justify-between border-b border-gray-300 dark:border-gray-700"
+    >
+      <BurgerMenuButton @toggle="toggleSidebar" />
+      <span class="text-gray-900 dark:text-gray-300 text-sm font-bold">
+        {{ authStore.user?.email || 'Boards' }}
+      </span>
+      <button
+        class="text-red-500 bg-transparent border-red-500 border-2 py-1 px-3 rounded-sm text-sm lg:text-md font-bold hover:bg-red-500 hover:text-white hover:cursor-pointer"
+        @click="logout"
+      >
+        Logout
+      </button>
+    </div>
+    <div v-if="isSidebarOpen" class="flex flex-col gap-2 w-full mt-2">
+      <p v-if="showLoading">Loading boards...</p>
+      <p v-else-if="error">{{ error }}</p>
+      <div v-else class="flex flex-col gap-2 w-full">
+        <KanbanBoardCard
+          v-for="board in boards"
+          :board="board"
+          @delete="deleteBoard"
+        ></KanbanBoardCard>
+      </div>
+      <div
+        class="h-8 w-full bg-white dark:bg-indigo-900 rounded-sm shadow-md flex flex-col justify-center gap-2 p-4 hover:bg-gray-200 dark:hover:bg-indigo-800 hover:cursor-pointer dark:text-gray-300"
+        @click="addBoard"
+      >
+        + Add Board
+      </div>
+    </div>
   </main>
 </template>
