@@ -8,6 +8,17 @@ import type { User } from '@/types/User'
 
 const API_URL = 'http://localhost:3000'
 
+export class ApiError extends Error {
+  constructor(
+    message: string,
+    public status: number,
+    public code?: string,
+  ) {
+    super(message)
+    this.name = 'ApiError'
+  }
+}
+
 async function request<T>(url: string, options?: RequestInit): Promise<T> {
   const response = await fetch(`${API_URL}${url}`, {
     ...options,
@@ -15,19 +26,24 @@ async function request<T>(url: string, options?: RequestInit): Promise<T> {
   })
 
   if (!response.ok) {
-    let message = response.statusText
+    let message = response.statusText || 'Request failed'
+    let code: string | undefined
 
     try {
       const data = await response.json()
 
-      if (typeof data.message === 'string') {
+      if (typeof data?.message === 'string') {
         message = data.message
       }
+
+      if (typeof data?.code === 'string') {
+        code = data.code
+      }
     } catch {
-      // Ignore JSON parse errors
+      // The response may not contain JSON.
     }
 
-    throw new Error(message)
+    throw new ApiError(message, response.status, code)
   }
 
   if (response.status === 204) {
@@ -55,11 +71,37 @@ export function logout(): Promise<void> {
   })
 }
 
-export function register(email: string, password: string): Promise<User> {
-  return request<User>('/auth/register', {
+export type RegistrationResponse = {
+  requiresEmailVerification: boolean
+  verificationEmailSent: boolean
+  message: string
+}
+
+export function register(email: string, password: string): Promise<RegistrationResponse> {
+  return request<RegistrationResponse>('/auth/register', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, password }),
+  })
+}
+
+type MessageResponse = {
+  message: string
+}
+
+export function resendVerificationEmail(email: string, password: string): Promise<MessageResponse> {
+  return request<MessageResponse>('/auth/resend-verification', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password }),
+  })
+}
+
+export function verifyEmail(token: string): Promise<{ message: string }> {
+  return request<{ message: string }>('/auth/verify-email', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ token }),
   })
 }
 

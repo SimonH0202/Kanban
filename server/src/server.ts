@@ -11,23 +11,16 @@ import {
 } from "./authorization/boardAuthorization.js";
 import { Prisma } from "@prisma/client";
 import CardOrderError from "./helpers/cardOrderError.js";
-
-function isRecordNotFound(error: unknown): boolean {
-  return (
-    error instanceof Prisma.PrismaClientKnownRequestError &&
-    error.code === "P2025"
-  );
-}
-
-function validatePassword(password: unknown): string | null {
-  if (typeof password !== "string") return "Password is required";
-  if ([...password].length < 15)
-    return "Password must be at least 15 characters";
-  if (Buffer.byteLength(password, "utf8") > 72) {
-    return "Password is too long for the current password hashing setup";
-  }
-  return null;
-}
+import {
+  createVerificationToken,
+  hashVerificationToken,
+  sendVerificationEmail,
+} from "./authorization/emailVerification.js";
+import {
+  isRecordNotFound,
+  validateEmail,
+  validatePassword,
+} from "./util/util.js";
 
 const app = express();
 
@@ -64,10 +57,25 @@ app.get("/auth/me", requireAuth, async (req, res) => {
 // Register a new user
 
 app.post("/auth/register", async (req, res) => {
-  const { email, password } = req.body;
+  const { email, password } = req.body ?? {};
 
-  if (!email || !password) {
-    res.status(400).json({ message: "Email and password are required" });
+  if (
+    typeof email !== "string" ||
+    !email.trim() ||
+    typeof password !== "string"
+  ) {
+    res.status(400).json({
+      message: "Email and password are required",
+    });
+    return;
+  }
+
+  const normalizedEmail = email.trim().toLowerCase();
+
+  const emailError = validateEmail(normalizedEmail);
+
+  if (emailError) {
+    res.status(400).json({ message: emailError });
     return;
   }
 
@@ -78,30 +86,204 @@ app.post("/auth/register", async (req, res) => {
     return;
   }
 
-  const existingUser = await prisma.user.findUnique({
-    where: {
-      email: email,
-    },
-  });
+  try {
+    const existingUser = await prisma.user.findUnique({
+      where: { email: normalizedEmail },
+    });
 
-  if (existingUser) {
-    res.status(400).json({ message: "User already exists" });
+    if (existingUser) {
+      res.status(409).json({
+        message: "An account with this email already exists",
+      });
+      return;
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 12);
+    const verification = createVerificationToken();
+
+    await prisma.user.create({
+      data: {
+        email: normalizedEmail,
+        passwordHash: hashedPassword,
+        emailVerificationTokenHash: verification.hash,
+        emailVerificationExpiresAt: verification.expiresAt,
+      },
+    });
+
+    try {
+      await sendVerificationEmail(normalizedEmail, verification.token);
+    } catch (error) {
+      console.error("Verification email delivery failed:", error);
+
+      // Keep the unverified account so delivery can be retried.
+      res.status(201).json({
+        requiresEmailVerification: true,
+        verificationEmailSent: false,
+        message:
+          "Account created, but the verification email could not be sent. Please request a new verification email.",
+      });
+      return;
+    }
+
+    res.status(201).json({
+      requiresEmailVerification: true,
+      verificationEmailSent: true,
+      message: "Check your email to verify your account",
+    });
+  } catch (error) {
+    // Handles two registrations for the same email arriving together.
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2002"
+    ) {
+      res.status(409).json({
+        message: "An account with this email already exists",
+      });
+      return;
+    }
+
+    console.error("Registration failed:", error);
+    res.status(500).json({ message: "Could not create account" });
+  }
+});
+
+app.post("/auth/verify-email", async (req, res) => {
+  const { token } = req.body ?? {};
+
+  // Our helper generates 32 random bytes encoded as 64 hex characters.
+  if (typeof token !== "string" || !/^[a-f0-9]{64}$/.test(token)) {
+    res.status(400).json({
+      message: "Invalid verification link",
+    });
     return;
   }
 
-  const hashedPassword = await bcrypt.hash(password, 12);
+  try {
+    const result = await prisma.user.updateMany({
+      where: {
+        emailVerifiedAt: null,
+        emailVerificationTokenHash: hashVerificationToken(token),
+        emailVerificationExpiresAt: { gt: new Date() },
+      },
+      data: {
+        emailVerifiedAt: new Date(),
+        emailVerificationTokenHash: null,
+        emailVerificationExpiresAt: null,
+      },
+    });
 
-  const user = await prisma.user.create({
-    data: {
-      email: email,
-      passwordHash: hashedPassword,
-    },
-  });
+    if (result.count === 0) {
+      res.status(400).json({
+        message:
+          "This verification link is invalid, expired, or already used. Please request a new email if needed.",
+      });
+      return;
+    }
 
-  res.status(201).json({
-    id: user.id,
-    email: user.email,
-  });
+    res.json({
+      message: "Email verified. You can now log in.",
+    });
+  } catch (error) {
+    console.error("Email verification failed:", error);
+    res.status(500).json({
+      message: "Could not verify email. Please try again.",
+    });
+  }
+});
+
+app.post("/auth/resend-verification", async (req, res) => {
+  const { email, password } = req.body ?? {};
+
+  if (
+    typeof email !== "string" ||
+    !email.trim() ||
+    typeof password !== "string" ||
+    !password
+  ) {
+    res.status(400).json({
+      message: "Email and password are required",
+    });
+    return;
+  }
+
+  try {
+    const user = await prisma.user.findUnique({
+      where: { email: email.trim().toLowerCase() },
+    });
+
+    if (!user || !(await bcrypt.compare(password, user.passwordHash))) {
+      res.status(401).json({
+        message: "Invalid email or password",
+      });
+      return;
+    }
+
+    if (user.emailVerifiedAt) {
+      res.json({
+        message: "Your email is already verified. You can log in.",
+      });
+      return;
+    }
+
+    // The helper sets expiry to 24 hours after token creation.
+    // Use that to enforce a 60-second resend cooldown.
+    if (user.emailVerificationExpiresAt) {
+      const issuedAt =
+        user.emailVerificationExpiresAt.getTime() - 24 * 60 * 60 * 1000;
+
+      const remainingMs = issuedAt + 60_000 - Date.now();
+
+      if (remainingMs > 0) {
+        res.setHeader("Retry-After", Math.ceil(remainingMs / 1000));
+        res.status(429).json({
+          message: "Please wait a minute before requesting another email",
+        });
+        return;
+      }
+    }
+
+    const verification = createVerificationToken();
+
+    const result = await prisma.user.updateMany({
+      where: {
+        id: user.id,
+        emailVerifiedAt: null,
+        emailVerificationTokenHash: user.emailVerificationTokenHash,
+        emailVerificationExpiresAt: user.emailVerificationExpiresAt,
+      },
+      data: {
+        emailVerificationTokenHash: verification.hash,
+        emailVerificationExpiresAt: verification.expiresAt,
+      },
+    });
+
+    if (result.count === 0) {
+      res.status(409).json({
+        message: "Account verification changed. Please try again.",
+      });
+      return;
+    }
+
+    try {
+      await sendVerificationEmail(user.email, verification.token);
+    } catch (error) {
+      console.error("Verification email delivery failed:", error);
+      res.status(502).json({
+        message:
+          "Could not send the verification email. Please wait a minute and try again.",
+      });
+      return;
+    }
+
+    res.json({
+      message: "Verification email sent. Check your inbox.",
+    });
+  } catch (error) {
+    console.error("Resending verification failed:", error);
+    res.status(500).json({
+      message: "Could not resend verification email",
+    });
+  }
 });
 
 // Login a user
@@ -114,9 +296,18 @@ app.post("/auth/login", async (req, res) => {
     return;
   }
 
+  const normalizedEmail = email.trim().toLowerCase();
+
+  const emailError = validateEmail(normalizedEmail);
+
+  if (emailError) {
+    res.status(400).json({ message: emailError });
+    return;
+  }
+
   const user = await prisma.user.findUnique({
     where: {
-      email: email,
+      email: normalizedEmail,
     },
   });
 
@@ -129,6 +320,14 @@ app.post("/auth/login", async (req, res) => {
 
   if (!isPasswordValid) {
     res.status(400).json({ message: "Invalid email or password" });
+    return;
+  }
+
+  if (!user.emailVerifiedAt) {
+    res.status(403).json({
+      code: "EMAIL_NOT_VERIFIED",
+      message: "Please verify your email before logging in",
+    });
     return;
   }
 
@@ -376,8 +575,12 @@ app.post<{ boardId: string }>(
     try {
       const { email } = req.body;
 
-      if (typeof email !== "string" || email.trim() === "") {
-        res.status(400).json({ message: "A valid email is required" });
+      const normalizedEmail = email.trim().toLowerCase();
+
+      const emailError = validateEmail(normalizedEmail);
+
+      if (emailError) {
+        res.status(400).json({ message: emailError });
         return;
       }
 

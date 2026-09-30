@@ -3,7 +3,8 @@ import BoardListView from '../views/BoardListView.vue'
 import BoardView from '@/views/BoardView.vue'
 import RegisterView from '@/views/RegisterView.vue'
 import LoginView from '@/views/LoginView.vue'
-import { useAuthStore } from '@/stores/auth'
+import VerifyEmailView from '@/views/VerifyEmailView.vue'
+import { useAuthStore } from '@/stores/auth.ts'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -31,10 +32,17 @@ const router = createRouter({
       name: 'login',
       component: LoginView,
     },
+    {
+      path: '/verify-email',
+      name: 'verify-email',
+      component: VerifyEmailView,
+    },
   ],
 })
 
 router.beforeEach(async (to) => {
+  if (to.name === 'verify-email') return
+
   const authStore = useAuthStore()
 
   // On the first navigation after loading/reloading the app,
