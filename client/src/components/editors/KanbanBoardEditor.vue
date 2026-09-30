@@ -115,11 +115,27 @@ async function addMemberToBoard() {
   await loadMembers()
 }
 
-async function removeMemberFromBoard(memberId: string) {
+function removeMemberFromBoard(memberId: string) {
+  if (!editorStore.currentBoard) return
+
+  confirmationStore.requestConfirmation(
+    'Are you sure you want to remove this member from the board?',
+    async () => {
+      await performRemoveMember(memberId)
+    },
+    () => {},
+  )
+}
+
+async function performRemoveMember(memberId: string) {
   if (!editorStore.currentBoard) return
 
   try {
     await boardStore.removeMemberFromBoard(editorStore.currentBoard.id, memberId)
+    result.value = {
+      success: true,
+      message: 'Member removed from the board.',
+    }
   } catch (error) {
     if (error instanceof Error) {
       result.value = { success: false, message: `Failed to remove member: ${error.message}` }
@@ -130,7 +146,6 @@ async function removeMemberFromBoard(memberId: string) {
       }
     }
   }
-
   await loadMembers()
 }
 </script>
