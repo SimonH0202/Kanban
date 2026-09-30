@@ -105,9 +105,10 @@ async function deleteColumn() {
       group="cards"
       ghost-class="card-ghost"
       @end="updateColumn"
-      :options="{
-        animation: 200,
-      }"
+      :animation="200"
+      :delay="250"
+      :delay-on-touch-only="true"
+      :touch-start-threshold="5"
     >
       <KanbanCard
         v-for="(card, index) in data.cards"

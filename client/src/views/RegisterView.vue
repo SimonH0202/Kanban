@@ -148,7 +148,7 @@ async function resendVerification() {
         v-if="!accountCreated"
         type="submit"
         :disabled="isLoading"
-        class="rounded-sm bg-blue-600 p-2 text-white enabled:hover:scale-101 enabled:hover:cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
+        class="rounded-sm bg-blue-600 p-2 text-white enabled:hover:scale-101 enabled:hover:cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 mt-4"
       >
         {{ isLoading ? 'Creating account...' : 'Create Account' }}
       </button>
