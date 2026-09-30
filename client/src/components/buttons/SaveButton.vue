@@ -1,6 +1,6 @@
 <script setup lang="ts">
 defineProps<{
-  unsavedChanges: boolean
+  disableOn: boolean
 }>()
 
 defineEmits<{
@@ -12,7 +12,7 @@ defineEmits<{
   <button
     class="rounded-md bg-blue-500 px-4 py-2 font-medium text-sm lg:text-md text-white hover:scale-105 hover:cursor-pointer hover:bg-blue-600 disabled:bg-gray-400 disabled:text-gray-200 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100"
     @click="$emit('save')"
-    :disabled="!unsavedChanges"
+    :disabled="disableOn"
   >
     Save
   </button>

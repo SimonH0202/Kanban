@@ -17,6 +17,7 @@ const originalTitle = ref(editorStore.currentBoard?.title || '')
 const newTitle = ref(editorStore.currentBoard?.title || '')
 const newMemberEmail = ref('')
 
+const loadMembersResult = ref<{ success: boolean; message?: string } | null>(null)
 const result = ref<{ success: boolean; message?: string } | null>(null)
 
 const members = ref<{ id: string; email: string }[]>([])
@@ -33,9 +34,10 @@ const isOwner = computed(() => {
 
 async function loadMembers(): Promise<void> {
   if (!editorStore.currentBoard) {
-    members.value = []
     return
   }
+
+  loadMembersResult.value = null
 
   try {
     const membersData = await boardStore.getAllMembers(editorStore.currentBoard.id)
@@ -44,8 +46,10 @@ async function loadMembers(): Promise<void> {
       email: member.user.email,
     }))
   } catch (error) {
-    console.error('Failed to fetch members:', error)
-    members.value = []
+    loadMembersResult.value = {
+      success: false,
+      message: 'Failed to load members.',
+    }
   }
 }
 
@@ -138,7 +142,10 @@ async function performRemoveMember(memberId: string) {
     }
   } catch (error) {
     if (error instanceof Error) {
-      result.value = { success: false, message: `Failed to remove member: ${error.message}` }
+      result.value = {
+        success: false,
+        message: `Failed to remove member: ${error.message}`,
+      }
     } else {
       result.value = {
         success: false,
@@ -194,6 +201,7 @@ async function performRemoveMember(memberId: string) {
             :showDeleteButton="isOwner"
             @remove-member="removeMemberFromBoard"
           />
+          <p v-if="loadMembersResult?.message">{{ loadMembersResult.message }}</p>
         </div>
 
         <div v-if="isOwner" class="mt-6 flex flex-col gap-4">
@@ -249,7 +257,7 @@ async function performRemoveMember(memberId: string) {
           Cancel
         </button>
 
-        <SaveButton :unsavedChanges="unsavedChanges" @save="saveBoard" />
+        <SaveButton :disableOn="unsavedChanges" @save="saveBoard" />
       </div>
     </div>
   </div>

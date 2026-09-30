@@ -60,15 +60,15 @@ function activateInput() {
   })
 }
 
-function addCard() {
-  boardStore.addCard(props.data.id, {
+async function addCard() {
+  await boardStore.addCard(props.data.id, {
     title: 'New Card',
     description: '',
   })
 }
 
-function deleteColumn() {
-  boardStore.deleteColumn(props.data.id)
+async function deleteColumn() {
+  await boardStore.deleteColumn(props.data.id)
 }
 </script>
 

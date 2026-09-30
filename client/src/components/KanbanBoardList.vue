@@ -90,8 +90,6 @@ async function deleteBoard(boardId: string) {
     }
   } catch (err) {
     error.value = err instanceof Error ? err.message : 'Failed to delete board'
-
-    console.error(err)
   }
 }
 

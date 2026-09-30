@@ -165,6 +165,7 @@ function removeTag(id: string) {
           v-model="newTitle"
           class="w-full shrink-0 rounded-sm border border-gray-200 bg-white p-2 text-left text-gray-900 outline-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300"
           type="text"
+          :disabled="isSaving"
         />
 
         <input
@@ -172,6 +173,7 @@ function removeTag(id: string) {
           v-model="newDueDate"
           type="date"
           class="w-32 shrink-0 rounded-md bg-gray-200 px-2 py-1 hover:cursor-pointer dark:bg-indigo-900 dark:text-gray-300"
+          :disabled="isSaving"
         />
 
         <label
@@ -184,6 +186,7 @@ function removeTag(id: string) {
         <textarea
           id="card-description"
           v-model="newDescription"
+          :disabled="isSaving"
           class="text-md min-h-16 w-full shrink-0 rounded-sm border border-gray-200 bg-white p-2 text-left text-gray-900 outline-blue-500 lg:min-h-60 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300"
         ></textarea>
 
@@ -203,7 +206,7 @@ function removeTag(id: string) {
           Cancel
         </button>
 
-        <SaveButton :unsavedChanges="unsavedChanges || isSaving" @save="saveCard" />
+        <SaveButton :disableOn="!(unsavedChanges && !isSaving) || isSaving" @save="saveCard" />
       </div>
     </div>
   </div>

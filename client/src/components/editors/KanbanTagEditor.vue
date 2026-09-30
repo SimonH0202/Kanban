@@ -100,7 +100,6 @@ async function saveTag() {
         </button>
       </div>
 
-
       <div class="min-h-0 overflow-y-auto p-4 text-gray-900 lg:p-8 dark:text-gray-300">
         <div class="flex flex-wrap gap-2">
           <EditableKanbanTag
@@ -140,7 +139,7 @@ async function saveTag() {
           />
 
           <div class="shrink-0">
-            <SaveButton :unsavedChanges="unsavedChanges" @save="saveTag" />
+            <SaveButton :disableOn="unsavedChanges" @save="saveTag" />
           </div>
         </div>
       </div>

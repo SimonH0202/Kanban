@@ -64,6 +64,5 @@ watch(
 
     <KanbanCardEditor v-if="editorStore.isEditingCard" />
     <KanbanTagEditor v-if="editorStore.isEditingTags" />
-    <ActionConfirmation />
   </div>
 </template>

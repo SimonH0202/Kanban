@@ -147,6 +147,8 @@ app.post("/auth/register", async (req, res) => {
   }
 });
 
+// Verify email address
+
 app.post("/auth/verify-email", async (req, res) => {
   const { token } = req.body ?? {};
 
@@ -190,6 +192,8 @@ app.post("/auth/verify-email", async (req, res) => {
     });
   }
 });
+
+// Resend verification email
 
 app.post("/auth/resend-verification", async (req, res) => {
   const { email, password } = req.body ?? {};
@@ -291,7 +295,12 @@ app.post("/auth/resend-verification", async (req, res) => {
 app.post("/auth/login", async (req, res) => {
   const { email, password } = req.body;
 
-  if (!email || !password) {
+  if (typeof email !== "string" || typeof password !== "string") {
+    res.status(400).json({ message: "Email and password are required" });
+    return;
+  }
+
+  if (!email?.trim() || !password) {
     res.status(400).json({ message: "Email and password are required" });
     return;
   }
@@ -575,6 +584,11 @@ app.post<{ boardId: string }>(
     try {
       const { email } = req.body;
 
+      if (typeof email !== "string" || !email.trim()) {
+        res.status(400).json({ message: "Email is required" });
+        return;
+      }
+
       const normalizedEmail = email.trim().toLowerCase();
 
       const emailError = validateEmail(normalizedEmail);
@@ -598,7 +612,7 @@ app.post<{ boardId: string }>(
 
       const user = await prisma.user.findUnique({
         where: {
-          email,
+          email: normalizedEmail,
         },
       });
 

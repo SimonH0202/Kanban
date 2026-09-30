@@ -4,12 +4,10 @@ const confirmationStore = useConfirmationStore()
 
 function confirmAction() {
   confirmationStore.confirm()
-  confirmationStore.isVisible = false
 }
 
 function cancelAction() {
   confirmationStore.cancel()
-  confirmationStore.isVisible = false
 }
 </script>
 
@@ -20,6 +18,9 @@ function cancelAction() {
   >
     <div class="bg-white dark:bg-gray-800 p-6 rounded shadow-lg w-96">
       <p class="mb-6 dark:text-gray-300">{{ confirmationStore.message }}</p>
+      <p v-if="confirmationStore.error" class="mb-6 text-red-500">
+        {{ confirmationStore.error }}
+      </p>
       <div class="flex justify-end gap-4">
         <button
           @click="cancelAction"
