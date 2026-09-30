@@ -24,12 +24,26 @@ import {
 
 const app = express();
 
+const frontendUrl = process.env.FRONTEND_URL;
+
+const authCookieOptions = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: "lax" as const,
+  path: "/",
+};
+
+if (!frontendUrl) {
+  throw new Error("FRONTEND_URL is required");
+}
+
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: new URL(frontendUrl).origin,
     credentials: true,
   }),
 );
+
 app.use(express.json());
 app.use(cookieParser());
 
@@ -345,9 +359,7 @@ app.post("/auth/login", async (req, res) => {
   });
 
   res.cookie("token", token, {
-    httpOnly: true,
-    secure: false, // Set to true in production
-    sameSite: "lax",
+    ...authCookieOptions,
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
   });
 
@@ -360,11 +372,7 @@ app.post("/auth/login", async (req, res) => {
 // Logout a user
 
 app.post("/auth/logout", (req, res) => {
-  res.clearCookie("token", {
-    httpOnly: true,
-    secure: false, // Set to true in production
-    sameSite: "lax",
-  });
+  res.clearCookie("token", authCookieOptions);
 
   res.status(204).send();
 });
