@@ -1658,6 +1658,8 @@ app.patch<{ boardId: string; tagId: string }>(
 
 // Log server running
 
-app.listen(3000, () => {
-  console.log("Server running on http://localhost:3000");
+const port = Number(process.env.PORT || 3000);
+
+app.listen(port, "0.0.0.0", () => {
+  console.log(`Server listening on port ${port}`);
 });
