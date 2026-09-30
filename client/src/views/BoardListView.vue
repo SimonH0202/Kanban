@@ -4,6 +4,6 @@ import KanbanBoardList from '@/components/KanbanBoardList.vue'
 
 <template>
   <div class="flex flex-row">
-    <KanbanBoardList />
+    <KanbanBoardList :startSidebarOpen="true" />
   </div>
 </template>

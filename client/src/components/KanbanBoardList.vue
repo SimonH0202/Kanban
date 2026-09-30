@@ -10,6 +10,10 @@ import { useAuthStore } from '@/stores/auth'
 import { useBoardStore } from '@/stores/board'
 import BurgerMenuButton from './buttons/BurgerMenuButton.vue'
 
+const props = defineProps<{
+  startSidebarOpen: boolean
+}>()
+
 const router = useRouter()
 const authStore = useAuthStore()
 
@@ -21,7 +25,7 @@ const isLoading = ref(false)
 const showLoading = ref(false)
 const error = ref('')
 
-const isSidebarOpen = ref(false)
+const isSidebarOpen = ref(props.startSidebarOpen)
 
 async function loadBoards() {
   isLoading.value = true
@@ -107,7 +111,7 @@ onMounted(() => {
 
 <template>
   <main
-    class="hidden h-full min-h-0 w-fit shrink-0 flex-col items-center justify-start gap-2 overflow-y-auto border-r border-gray-300 bg-white px-2 lg:flex dark:border-gray-700 dark:bg-gray-800"
+    class="hidden h-svh min-h-0 w-fit shrink-0 flex-col items-center justify-start gap-2 overflow-y-auto border-r border-gray-300 bg-white px-2 lg:flex dark:border-gray-700 dark:bg-gray-800"
   >
     <div
       class="w-full h-fit py-2 gap-4 flex items-center justify-between border-b border-gray-300 dark:border-gray-700"

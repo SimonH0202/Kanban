@@ -50,7 +50,7 @@ watch(
 
 <template>
   <div class="flex h-dvh min-h-0 flex-col overflow-hidden lg:flex-row">
-    <KanbanBoardList />
+    <KanbanBoardList :startSidebarOpen="false" />
 
     <div class="min-h-0 min-w-0 flex-1 overflow-hidden">
       <div v-if="showLoading" class="w-full p-6 text-center text-lg">Loading...</div>
