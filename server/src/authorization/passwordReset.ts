@@ -1,4 +1,4 @@
-export async function sendVerificationEmail(email: string, token: string) {
+export async function sendPasswordResetEmail(email: string, token: string) {
   const apiKey = process.env.RESEND_API_KEY;
   const from = process.env.EMAIL_FROM;
   const frontendUrl = process.env.FRONTEND_URL;
@@ -7,7 +7,7 @@ export async function sendVerificationEmail(email: string, token: string) {
     throw new Error("Email delivery is not configured");
   }
 
-  const link = new URL("/verify-email", frontendUrl);
+  const link = new URL("/reset-password", frontendUrl);
   link.searchParams.set("token", token);
 
   const response = await fetch("https://api.resend.com/emails", {
@@ -19,9 +19,9 @@ export async function sendVerificationEmail(email: string, token: string) {
     body: JSON.stringify({
       from,
       to: [email],
-      subject: "Verify your Kanban email address",
+      subject: "Reset your Kanban password",
       text:
-        `Open this link within 24 hours to verify your email:\n\n` +
+        `Open this link within 24 hours to reset your password:\n\n` +
         `${link}\n\n` +
         `If you did not create an account, ignore this message.`,
     }),

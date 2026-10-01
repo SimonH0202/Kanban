@@ -1,4 +1,5 @@
 import { Prisma } from "@prisma/client";
+import { createHash, randomBytes } from "node:crypto";
 
 export function isRecordNotFound(error: unknown): boolean {
   return (
@@ -24,4 +25,18 @@ export function validateEmail(email: unknown): string | null {
     return "Invalid email address";
   }
   return null;
+}
+
+export function createVerificationToken() {
+  const token = randomBytes(32).toString("hex");
+
+  return {
+    token,
+    hash: hashVerificationToken(token),
+    expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+  };
+}
+
+export function hashVerificationToken(token: string) {
+  return createHash("sha256").update(token).digest("hex");
 }

@@ -11,16 +11,14 @@ import {
 } from "./authorization/boardAuthorization.js";
 import { Prisma } from "@prisma/client";
 import CardOrderError from "./helpers/cardOrderError.js";
-import {
-  createVerificationToken,
-  hashVerificationToken,
-  sendVerificationEmail,
-} from "./authorization/emailVerification.js";
+import { sendVerificationEmail } from "./authorization/emailVerification.js";
+import { createVerificationToken, hashVerificationToken } from "./util/util.js";
 import {
   isRecordNotFound,
   validateEmail,
   validatePassword,
 } from "./util/util.js";
+import { sendPasswordResetEmail } from "./authorization/passwordReset.js";
 
 const app = express();
 
@@ -302,6 +300,98 @@ app.post("/auth/resend-verification", async (req, res) => {
       message: "Could not resend verification email",
     });
   }
+});
+
+// Send password reset email
+
+app.post("/auth/request-password-reset", async (req, res) => {
+  const { email } = req.body ?? {};
+
+  if (typeof email !== "string") {
+    res.status(400).json({ message: "Email is required" });
+    return;
+  }
+
+  const normalizedEmail = email.trim().toLowerCase();
+
+  const emailError = validateEmail(normalizedEmail);
+
+  if (emailError) {
+    res.status(400).json({ message: emailError });
+    return;
+  }
+
+  const user = await prisma.user.findUnique({
+    where: {
+      email: normalizedEmail,
+    },
+    select: {
+      id: true,
+      emailVerifiedAt: true,
+      passwordResetTokenHash: true,
+      passwordResetExpiresAt: true,
+    },
+  });
+
+  if (!user) {
+    res.status(400).json({ message: "Invalid email" });
+    return;
+  }
+
+  if (!user.emailVerifiedAt) {
+    res.status(403).json({
+      code: "EMAIL_NOT_VERIFIED",
+      message: "Please verify your email before resetting your password",
+    });
+    return;
+  }
+
+  if (user.passwordResetExpiresAt) {
+    const remainingMs = user.passwordResetExpiresAt.getTime() - Date.now();
+    if (remainingMs > 0) {
+      res.setHeader("Retry-After", Math.ceil(remainingMs / 1000));
+      res.status(429).json({
+        code: "PASSWORD_RESET_RATE_LIMITED",
+        message: "Please wait before requesting another password reset",
+      });
+      return;
+    }
+  }
+
+  if (user.passwordResetTokenHash) {
+    res.status(409).json({
+      code: "PASSWORD_RESET_TOKEN_EXISTS",
+      message: "A password reset is already in progress",
+    });
+    return;
+  }
+
+  const verification = createVerificationToken();
+
+  await prisma.user.updateMany({
+    where: {
+      id: user.id,
+    },
+    data: {
+      passwordResetTokenHash: verification.hash,
+      passwordResetExpiresAt: verification.expiresAt,
+    },
+  });
+
+  try {
+    await sendPasswordResetEmail(email, verification.token);
+  } catch (error) {
+    console.error("Password reset email delivery failed:", error);
+    res.status(502).json({
+      message:
+        "Could not send the password reset email. Please wait a minute and try again.",
+    });
+    return;
+  }
+
+  res.json({
+    message: "Password reset email sent. Check your inbox.",
+  });
 });
 
 // Login a user
